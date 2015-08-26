@@ -1,7 +1,6 @@
 grammar LA;
 
 programa  :  'algoritmo' CORPO 'fim-algoritmo' ;
-SPACE : [ \t\r\n]+ -> skip ;
 DECLARACOES  :  DECL_LOCAL_GLOBAL DECLARACOES |   ;
 DECL_LOCAL_GLOBAL  :  DECLARACAO_LOCAL | DECLARACAO_GLOBAL ;
 DECLARACAO_LOCAL  :  'declare' VARIAVEL 
@@ -74,7 +73,9 @@ OUTROS_FATORES_LOGICOS  :  'e' FATOR_LOGICO OUTROS_FATORES_LOGICOS |   ;
 FATOR_LOGICO  :  OP_NAO PARCELA_LOGICA ;
 PARCELA_LOGICA  :  'verdadeiro' | 'falso' | EXP_RELACIONAL ;
 
-CADEIA : ('a'..'z' | 'A'..'Z'|'0'..'9'|'_')+;
-IDENT : ('a'..'z' | 'A'..'Z'|'0'..'9'|'_')+;
-NUM_REAL : ('a'..'z' | 'A'..'Z'|'0'..'9'|'_')+;
-NUM_INT : ('a'..'z' | 'A'..'Z'|'0'..'9'|'_')+;
+CADEIA : [a-zA-Z0-9 ]*;
+IDENT : [_a-zA-Z][_a-zA-Z0-9]*;
+NUM_INT : [0-9]+;
+NUM_REAL : [0-9]+'.'[0-9]+;
+
+ESPACO : [ \t\r\n]+ -> skip ;
