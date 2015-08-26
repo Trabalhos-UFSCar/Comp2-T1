@@ -1,8 +1,7 @@
 grammar LA;
 
-r : PROGRAMA;
-
-PROGRAMA  :  DECLARACOES 'algoritmo' CORPO 'fim_algoritmo' ;
+programa  :  'algoritmo' CORPO 'fim-algoritmo' ;
+SPACE : [ \t\r\n]+ -> skip ;
 DECLARACOES  :  DECL_LOCAL_GLOBAL DECLARACOES |   ;
 DECL_LOCAL_GLOBAL  :  DECLARACAO_LOCAL | DECLARACAO_GLOBAL ;
 DECLARACAO_LOCAL  :  'declare' VARIAVEL 
