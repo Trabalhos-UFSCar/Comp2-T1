@@ -1,3 +1,7 @@
-*.tokens
+# Java
 *.class
-LA*.java
+
+# IntelliJ
+*.iml
+*.iws
+.idea
