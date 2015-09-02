@@ -1,7 +1,7 @@
 /*
     Grammar for LA language.
-    Students:   Joao Paulo Soares
-                Thiago Nogueira
+    Students:   Joao Paulo Soares		408034
+                Thiago Nogueira			407534
                 Camilo Moreira
                 Thales Menato           407976
 */
