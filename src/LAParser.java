@@ -1,5 +1,4 @@
-// Generated from /home/thales/IdeaProjects/Comp2-T1/src/LA.g4 by ANTLR 4.5.1
-package src;
+// Generated from LA.g4 by ANTLR 4.5
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class LAParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.5.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.5", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -62,7 +61,7 @@ public class LAParser extends Parser {
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'algoritmo'", "'fim-algoritmo'", "'declare'", "'constante'", "':'", 
+		null, "'algoritmo'", "'fim_algoritmo'", "'declare'", "'constante'", "':'", 
 		"'='", "'tipo'", "','", "'^'", "'.'", "'['", "']'", "'literal'", "'inteiro'", 
 		"'real'", "'logico'", "'verdadeiro'", "'falso'", "'registro'", "'fim_registro'", 
 		"'procedimento'", "'('", "')'", "'fim_procedimento'", "'funcao'", "'fim_funcao'", 

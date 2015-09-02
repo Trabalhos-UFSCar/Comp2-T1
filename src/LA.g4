@@ -144,7 +144,7 @@ parcela_logica  :  'verdadeiro' | 'falso' | exp_relacional ;
 
 // Lexer
 
-CADEIA : '"' [a-zA-Z0-9 ]* '"';
+CADEIA : '"' [a-zA-Z0-9 \\.:,;!?+-*/_]* '"';
 
 IDENT : [_a-zA-Z][_a-zA-Z0-9]*;
 
