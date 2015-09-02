@@ -10,7 +10,7 @@ grammar LA;
 
 // Parser
 
-programa  :  declaracoes 'algoritmo' corpo 'fim-algoritmo' ;
+programa  :  declaracoes 'algoritmo' corpo 'fim_algoritmo' ;
 
 declaracoes  :  decl_local_global declaracoes |   ;
 
