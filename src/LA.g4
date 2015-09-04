@@ -2,8 +2,8 @@
     Grammar for LA language.
     Students:   Joao Paulo Soares		408034
                 Thiago Nogueira			407534
-                Camilo Moreira
-                Thales Menato           407976
+                Camilo Moreira                  359645
+                Thales Menato                   407976
 */
 
 grammar LA;
@@ -26,7 +26,7 @@ grammar LA;
 
 // Parser
 
-programa  :  declaracoes 'algoritmo' corpo 'fim_algoritmo' ;
+programa  :  declaracoes 'algoritmo' corpo 'fim_algoritmo';
 
 declaracoes  :  decl_local_global declaracoes |   ;
 

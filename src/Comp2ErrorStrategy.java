@@ -23,12 +23,16 @@ public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
 
     @Override
     public void reset(Parser parser) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     @Override
     public Token recoverInline(Parser parser) throws RecognitionException {
-        System.out.println("Fim de Compilação");
+        System.out.println("Linha " + parser.getCurrentToken().getLine() +
+                ": erro sintatico proximo a " + parser.getCurrentToken().getText());
+        
+        System.out.println("Fim de Compilacao");
+        parser.reset();
         return null;
     }
 
@@ -49,6 +53,7 @@ public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
 
     @Override
     public void reportMatch(Parser parser) {
+        
     }
 
     @Override
@@ -56,6 +61,8 @@ public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
         System.out.println("Linha " + re.getOffendingToken().getLine() +
                 ": erro sintatico proximo a " + re.getOffendingToken().getText());
         
+        System.out.println("Fim de Compilacao");
+        parser.reset();
     }
     
 }
