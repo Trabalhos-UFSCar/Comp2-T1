@@ -8,6 +8,22 @@
 
 grammar LA;
 
+@lexer::members
+{
+   private void stop(String msg)
+   {
+      throw new ParseCancellationException(msg);
+   }
+}
+
+@parser::members
+{
+   private void stop(String msg)
+   {
+      throw new ParseCancellationException(msg);
+   }
+}
+
 // Parser
 
 programa  :  declaracoes 'algoritmo' corpo 'fim_algoritmo' ;
@@ -30,7 +46,8 @@ ponteiros_opcionais  :  '^' ponteiros_opcionais |   ;
 
 outros_ident  :  '.' identificador | ;
 
-dimensao  :  '[' exp_aritmetica ']' dimensao | ;
+dimensao  :  '[' exp_aritmetica ']' dimensao 
+{ /*stop("Linha "+ _localctx.getStart().getLine() + " : " + _localctx.getStart().getText() + " - simbolo nao identificado");*/ }| ;
 
 tipo  :  registro | tipo_estendido ;
 
@@ -144,12 +161,19 @@ parcela_logica  :  'verdadeiro' | 'falso' | exp_relacional ;
 
 // Lexer
 
-CADEIA : '"' [a-zA-Z0-9 \\.:,;!?+-*/_]* '"';
+CADEIA : '"' ~[\r\n]* '"';
 
 IDENT : [_a-zA-Z][_a-zA-Z0-9]*;
 
 NUM_INT : [0-9]+;
 
 NUM_REAL : [0-9]+'.'[0-9]+;
+
+COMENTARIO : '{' .*? '}' -> skip;
+
+COMENTARIO_ERRADO
+    : '{' ~('\r'|'\n'|'}')* '\n' 
+      { stop("Linha " + getLine() + ": comentario nao fechado"); }
+    ;
 
 ESPACO : [ \t\r\n]+ -> skip ;
