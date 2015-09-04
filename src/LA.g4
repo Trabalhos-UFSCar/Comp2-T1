@@ -46,8 +46,7 @@ ponteiros_opcionais  :  '^' ponteiros_opcionais |   ;
 
 outros_ident  :  '.' identificador | ;
 
-dimensao  :  '[' exp_aritmetica ']' dimensao 
-{ /*stop("Linha "+ _localctx.getStart().getLine() + " : " + _localctx.getStart().getText() + " - simbolo nao identificado");*/ }| ;
+dimensao  :  '[' exp_aritmetica ']' dimensao | ;
 
 tipo  :  registro | tipo_estendido ;
 
@@ -177,3 +176,7 @@ COMENTARIO_ERRADO
     ;
 
 ESPACO : [ \t\r\n]+ -> skip ;
+
+ERROR
+    : . { stop("Linha "+ getLine() +": "+ getText() +" - simbolo nao identificado"); }
+    ;
