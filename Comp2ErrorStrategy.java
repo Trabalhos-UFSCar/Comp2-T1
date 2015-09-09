@@ -1,3 +1,5 @@
+package comp2;
+
 
 import java.util.BitSet;
 import org.antlr.v4.runtime.ANTLRErrorListener;
@@ -14,39 +16,31 @@ import org.antlr.v4.runtime.dfa.DFA;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
  *
  * @author camilo
  */
 public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
 
-    SaidaParser out;
-
     @Override
     public void reset(Parser parser) {
 
     }
 
-    public Comp2ErrorStrategy(SaidaParser out) {
-        this.out = out;
-    }
-
     @Override
     public Token recoverInline(Parser parser) throws RecognitionException {
-        String tkName = parser.getCurrentToken().getText();
-        if(tkName.equals("<EOF>")) tkName = "EOF";
+        System.out.println("Linha " + parser.getCurrentToken().getLine() +
+                ": erro sintatico proximo a " + parser.getCurrentToken().getText());
         
-        out.println("Linha " + parser.getCurrentToken().getLine()
-                + ": erro sintatico proximo a " + tkName);
-
-        out.println("Fim da compilacao");
+        System.out.println("Fim de Compilacao");
         parser.reset();
         return null;
     }
 
     @Override
     public void recover(Parser parser, RecognitionException re) throws RecognitionException {
-
+        
     }
 
     @Override
@@ -61,18 +55,16 @@ public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
 
     @Override
     public void reportMatch(Parser parser) {
-
+        
     }
 
     @Override
     public void reportError(Parser parser, RecognitionException re) {
-        String tkName = parser.getCurrentToken().getText();
-        if(tkName.equals("<EOF>")) tkName = "EOF";
-        out.println("Linha " + re.getOffendingToken().getLine()
-                + ": erro sintatico proximo a " + tkName);
-
-        out.println("Fim da compilacao");
+        System.out.println("Linha " + re.getOffendingToken().getLine() +
+                ": erro sintatico proximo a " + re.getOffendingToken().getText());
+        
+        System.out.println("Fim de Compilacao");
         parser.reset();
     }
-
+    
 }
