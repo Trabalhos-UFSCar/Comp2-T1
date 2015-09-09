@@ -10,12 +10,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * of the available methods.
  */
 public class LABaseListener implements LAListener {
-
-    //SaidaParser
-    public LABaseListener() {
-    }
-    
-    
 	/**
 	 * {@inheritDoc}
 	 *
