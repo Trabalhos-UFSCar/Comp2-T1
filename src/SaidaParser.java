@@ -15,6 +15,10 @@ public class SaidaParser {
         this.buffer = new StringBuffer();
     }
     
+    public void print(String texto){
+        buffer.append(texto);
+    }
+    
     public void println(String texto) {
         buffer.append(texto+"\n");
     }

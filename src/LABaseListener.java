@@ -1,4 +1,4 @@
-// Generated from LA.g4 by ANTLR 4.5.1
+// Generated from .\src\LA.g4 by ANTLR 4.5.1
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -10,12 +10,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * of the available methods.
  */
 public class LABaseListener implements LAListener {
-
-    //SaidaParser
-    public LABaseListener() {
-    }
-    
-    
 	/**
 	 * {@inheritDoc}
 	 *

@@ -44,7 +44,7 @@ public class Comp2 {
         try {
             LAParser.ProgramaContext tree = parser.programa();
 
-            LAListener l = new LABaseListener();
+            LAListener l = new Comp2Listener(out);
             ParseTreeWalker ptw = new ParseTreeWalker();
             ptw.walk(l, tree);
         } catch (ParseCancellationException pce) {
