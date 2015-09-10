@@ -38,6 +38,7 @@ public class Escopos {
     public void desempilhar() {
         TabelaDeSimbolos ts = pilha.pop();
         System.out.println(ts.toString());
+
     }
 
     public List getTodasTabelas() {

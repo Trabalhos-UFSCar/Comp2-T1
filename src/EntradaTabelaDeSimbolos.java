@@ -3,7 +3,7 @@
 
 public class EntradaTabelaDeSimbolos {
     private String nome, tipo;
-    private Integer dimensao;
+    private Integer dimensao;//TODO: checar se´será necessário este valor
     
     public EntradaTabelaDeSimbolos(String nome, String tipo) {
         this.nome = nome;
