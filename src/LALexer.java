@@ -1,4 +1,4 @@
-// Generated from LA.g4 by ANTLR 4.5.1
+// Generated from C:\Projetos\Comp2-T1\src\LA.g4 by ANTLR 4.5
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class LALexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.5.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.5", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -96,10 +96,12 @@ public class LALexer extends Lexer {
 	}
 
 
-	   private void stop(String msg)
-	   {
+	    Escopos escopos = new Escopos();
+	    
+	    private void stop(String msg)
+	    {
 	      throw new ParseCancellationException(msg);
-	   }
+	    }
 
 
 	public LALexer(CharStream input) {
