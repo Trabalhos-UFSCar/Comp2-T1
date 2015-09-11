@@ -5,6 +5,17 @@
 *.iml
 *.iws
 .idea
-/nbproject/private/
-/build/
-/dist/
+
+# Project
+build
+dist
+nbproject
+temp
+
+#ANTRL files
+LABaseListener.java
+LALexer.java
+LA.tokens
+LALexer.tokens
+LAListener.java
+LAParser.java

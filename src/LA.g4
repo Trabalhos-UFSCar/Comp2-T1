@@ -42,22 +42,32 @@ declaracao_local  :
     | 'tipo' IDENT ':' tipo ;
 
 
-variavel :  
-    nome=IDENT 
-    dimensao 
-    mais_var 
+variavel returns [List<String> nomes]
+    @init{ $nomes=new ArrayList<>();} :  
+    nome=IDENT dimensao  outros=mais_var 
     ':' 
     tp=tipo 
-    {if(!escopos.topo().existeSimbolo($nome.text)){
-        escopos.adicionarSimbolo($nome.text,$tp.text);
-     } else {
-     //reporta erro
-     }
+    {
+        $nomes.add($nome.text);
+        $nomes.addAll($outros.nomes);
+        for(String n:$nomes){
+            if(!escopos.topo().existeSimbolo(n)){
+                escopos.adicionarSimbolo(n,$tp.text);
+            } else {
+                //reporta erro
+            }
+        }
     }
 ;
 
-mais_var  :  
-    ',' IDENT dimensao mais_var 
+mais_var returns [List<String> nomes] 
+    @init{$nomes=new ArrayList<>();} :
+  
+    ',' nome=IDENT dimensao outros=mais_var
+    {
+        $nomes.add($nome.text);
+        $nomes.addAll($outros.nomes);
+    } 
     |   
 ;
 
