@@ -76,7 +76,7 @@
  
     <target name="init-antlr">
 	<!-- Full path to Antlr jar -->
-        <property name="antlr.jar" location="C:/Users/Thiago/Desktop/Faculdade/Compiladores1/antlr-4.5-complete.jar"/>
+        <property name="antlr.jar" location="lib/antlr-4.5.1-complete.jar"/>
 	<!-- Grammar path -->
 	<property name="antlr.grammar" location="src/LA.g4"/>
     </target>
