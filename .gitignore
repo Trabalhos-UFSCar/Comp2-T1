@@ -13,7 +13,7 @@ nbproject
 temp
 
 #ANTRL files
-LABaseListener.jave
+LABaseListener.java
 LALexer.java
 LA.tokens
 LALexer.tokens
