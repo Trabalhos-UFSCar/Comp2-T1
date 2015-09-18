@@ -31,13 +31,13 @@ public class Comp2 {
         parser.setErrorHandler(new Comp2ErrorStrategy(out));
         try {
             LAParser.ProgramaContext tree = parser.programa();
+            
+            LAVisitor v = new Comp2Visitor(out);
+            v.visitPrograma(tree);
 
             LAListener l = new Comp2Listener(out, parser.escopos);
             ParseTreeWalker ptw = new ParseTreeWalker();
             ptw.walk(l, tree);
-            
-            LAVisitor v = new Comp2Visitor(out);
-            v.visitPrograma(tree);
         } catch (ParseCancellationException pce) {
             out.println(pce.getMessage());
             out.println("Fim da compilacao");

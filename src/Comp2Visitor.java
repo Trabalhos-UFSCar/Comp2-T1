@@ -1,4 +1,5 @@
 // Generated from .\src\LA.g4 by ANTLR 4.5.1
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -15,6 +16,21 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     public Comp2Visitor(SaidaParser out){
         this.out = out;
     }
+    
+    public boolean regraVazia(ParserRuleContext ctx){
+        return ctx.getText().equals("");
+    } 
+    
+    public String tipo(String LATipo){
+        if(LATipo.equals("inteiro")){
+            return "int";
+        }else if(LATipo.equals("real")){
+            return "float";
+        }
+        else{
+            return "";
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -23,7 +39,32 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public T visitPrograma(LAParser.ProgramaContext ctx) { 
-        out.println("Entrou programa");
+        out.println("/* Arquivo gerado automaticamente */\n");
+        out.println("#include <stdio.h>");
+        out.println("#include <stdlib.h>\n");
+        
+        out.println("int main(){");
+        out.identationLevel++;
+        
+        visitDeclaracoes(ctx.declaracoes());
+        
+        visitCorpo(ctx.corpo());
+        
+        out.println("return 0;");
+        out.identationLevel--;
+        out.println("}");
+        
+        return null; 
+    }
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { 
+        System.out.println("Passei delcaracoes");
+//        out.print();
         return visitChildren(ctx); 
     }
     /**
@@ -32,411 +73,154 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { return visitChildren(ctx); }
+    @Override public T visitDecl_local_global(LAParser.Decl_local_globalContext ctx) { 
+        return visitChildren(ctx); 
+    }
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDecl_local_global(LAParser.Decl_local_globalContext ctx) { return visitChildren(ctx); }
+    @Override public T visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
+        if(!regraVazia(ctx.variavel())){
+            visitVariavel(ctx.variavel());
+        }
+        return visitChildren(ctx);
+    }
+    
+    @Override public T visitVariavel(LAParser.VariavelContext ctx) { 
+        String variavel = 
+         tipo(ctx.tipo().getText()) +
+         " " +
+         ctx.IDENT().getText() + 
+         visitDimensao(ctx.dimensao()) +
+         visitMais_var(ctx.mais_var()) +
+         ";"
+        ;
+        
+        out.println(variavel);
+        
+        return visitChildren(ctx); 
+    }
+    
+    @Override public T visitDimensao(LAParser.DimensaoContext ctx) {
+        if(regraVazia(ctx)){
+            return (T) "";
+        }
+        
+        String dimensao = 
+         "[" +
+         visitExp_aritmetica(ctx.exp_aritmetica()) +
+         "]"
+        ;
+        
+        return (T) dimensao; 
+    }
+    
+    @Override public T visitMais_var(LAParser.Mais_varContext ctx) { 
+        if(regraVazia(ctx)){
+            return (T) "";
+        }
+        
+        return visitChildren(ctx); 
+    }
+    
     /**
      * {@inheritDoc}
      *
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDeclaracao_local(LAParser.Declaracao_localContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitVariavel(LAParser.VariavelContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_var(LAParser.Mais_varContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitIdentificador(LAParser.IdentificadorContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitPonteiros_opcionais(LAParser.Ponteiros_opcionaisContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOutros_ident(LAParser.Outros_identContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitDimensao(LAParser.DimensaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitTipo(LAParser.TipoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_ident(LAParser.Mais_identContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_variaveis(LAParser.Mais_variaveisContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitTipo_basico(LAParser.Tipo_basicoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitTipo_basico_ident(LAParser.Tipo_basico_identContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitValor_constante(LAParser.Valor_constanteContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitRegistro(LAParser.RegistroContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitParametros_opcional(LAParser.Parametros_opcionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitParametro(LAParser.ParametroContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitVar_opcional(LAParser.Var_opcionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_parametros(LAParser.Mais_parametrosContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitDeclaracoes_locais(LAParser.Declaracoes_locaisContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitCorpo(LAParser.CorpoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitComandos(LAParser.ComandosContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitCmd(LAParser.CmdContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_expressao(LAParser.Mais_expressaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitSenao_opcional(LAParser.Senao_opcionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitArgumentos_opcional(LAParser.Argumentos_opcionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitSelecao(LAParser.SelecaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_selecao(LAParser.Mais_selecaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitConstantes(LAParser.ConstantesContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitMais_constantes(LAParser.Mais_constantesContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitNumero_intervalo(LAParser.Numero_intervaloContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitIntervalo_opcional(LAParser.Intervalo_opcionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOp_unario(LAParser.Op_unarioContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOp_multiplicacao(LAParser.Op_multiplicacaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOp_adicao(LAParser.Op_adicaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitTermo(LAParser.TermoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOutros_termos(LAParser.Outros_termosContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitFator(LAParser.FatorContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOutros_fatores(LAParser.Outros_fatoresContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitParcela(LAParser.ParcelaContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitParcela_unario(LAParser.Parcela_unarioContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOutras_parcelas(LAParser.Outras_parcelasContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitChamada_partes(LAParser.Chamada_partesContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitExp_relacional(LAParser.Exp_relacionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOp_opcional(LAParser.Op_opcionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOp_relacional(LAParser.Op_relacionalContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitExpressao(LAParser.ExpressaoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOp_nao(LAParser.Op_naoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitTermo_logico(LAParser.Termo_logicoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOutros_termos_logicos(LAParser.Outros_termos_logicosContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitOutros_fatores_logicos(LAParser.Outros_fatores_logicosContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitFator_logico(LAParser.Fator_logicoContext ctx) { return visitChildren(ctx); }
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The default implementation returns the result of calling
-     * {@link #visitChildren} on {@code ctx}.</p>
-     */
-    @Override public T visitParcela_logica(LAParser.Parcela_logicaContext ctx) { return visitChildren(ctx); }
+    @Override public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
+        System.out.println("passei global");
+//        out.println("global");
+        return visitChildren(ctx); 
+    }
+    
+    @Override public T visitCorpo(LAParser.CorpoContext ctx) {
+        System.out.println("passei corpo");
+        
+        visitDeclaracoes_locais(ctx.declaracoes_locais());
+        
+        visitComandos(ctx.comandos());
+        
+        return visitChildren(ctx); 
+    }
+    
+    @Override public T visitDeclaracoes_locais(LAParser.Declaracoes_locaisContext ctx){
+        if(regraVazia(ctx)){
+            return null;
+        }
+        
+        visitDeclaracao_local(ctx.declaracao_local());
+        
+        visitDeclaracoes_locais(ctx.declaracoes_locais());
+        
+        return visitChildren(ctx);
+    }
+    
+    @Override public T visitComandos(LAParser.ComandosContext ctx) { 
+        if(regraVazia(ctx)){
+            return null;
+        }
+        
+        visitCmd(ctx.cmd());
+        
+        visitComandos(ctx.comandos());
+
+        return visitChildren(ctx); 
+    }
+    
+    @Override public T visitCmd(LAParser.CmdContext ctx) { 
+        String cmd = "";
+        
+        if(ctx.getStart().getText().equals("leia")){
+            cmd += "scanf(\"%d\",&" + visitIdentificador(ctx.identificador()) + ");";
+        }else if(ctx.getStart().getText().equals("escreva")){
+            cmd += "printf(\"%d\", " + visitExpressao(ctx.expressao()) + ");";
+        }
+        
+        System.out.println(ctx.getText());
+        
+        out.println(cmd);
+        
+        return visitChildren(ctx); 
+    }
+    
+    @Override public T visitExpressao(LAParser.ExpressaoContext ctx) { 
+        String expressao = "";
+        System.out.println(ctx.getText());
+        
+        expressao = (String) visitExp_aritmetica(ctx.termo_logico().fator_logico().parcela_logica().exp_relacional().exp_aritmetica());
+        
+        return (T) expressao; 
+    }
+    
+    @Override public T visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) { 
+        String exp_aritmetica = "";
+        System.out.println(ctx.getText());
+        
+        exp_aritmetica += (String) visitParcela_unario(ctx.termo().fator().parcela().parcela_unario());
+        
+        return (T) exp_aritmetica; 
+    }
+    
+    @Override public T visitParcela_unario(LAParser.Parcela_unarioContext ctx) { 
+        String parcela_unario = "";
+        
+        if(!ctx.IDENT().getText().equals("")){
+            parcela_unario += ctx.IDENT().getText();
+        }else if(!ctx.NUM_INT().getText().equals("")){
+            parcela_unario += ctx.NUM_INT().getText();
+        }else if(!ctx.NUM_REAL().getText().equals("")){
+            parcela_unario += ctx.NUM_REAL().getText();
+        }
+        
+        return (T) parcela_unario; 
+    }
+    
+    @Override public T visitIdentificador(LAParser.IdentificadorContext ctx) {
+        return (T) ctx.IDENT().getText(); 
+    }
 }

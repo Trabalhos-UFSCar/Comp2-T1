@@ -31,21 +31,12 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterPrograma(LAParser.ProgramaContext ctx) {
-        out.println("/* Arquivo gerado automaticamente */\n");
-        out.println("#include <stdio.h>");
-        out.println("#include <stdlib.h>\n");
-
-        out.println("int main(){");
-        
         escopos.empilhar("global");
     }
 
     @Override
     public void exitPrograma(LAParser.ProgramaContext ctx) {
         /* out.println("exitPrograma"); */
-
-        out.println("    return 0;");
-        out.println("}");
     }
 
     @Override
@@ -63,12 +54,6 @@ public class Comp2Listener extends LABaseListener {
         if (ctx.tipo().getText().equals("inteiro")) {
             vars = "int ";
         }
-        vars += ctx.IDENT();
-        ctx.nomes.remove(ctx.IDENT().getText());
-        for(String nome:ctx.nomes){
-            vars+=", "+nome;
-        }
-        out.println("    " + vars + ";");
     }
 
     @Override
@@ -84,28 +69,27 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterIdentificador(LAParser.IdentificadorContext ctx) {
         /* out.println("enterIdentificador"); */
-        out.print(ctx.IDENT().getText());
     }
 
     @Override
     public void enterCmd(LAParser.CmdContext ctx) {
         /* out.println("enterCmd"); */
 //            out.println(ctx.toStringTree());
-        if (ctx.getStart().getText().equals("leia")) {
-            out.print("    scanf(\"%d\",&");
-        } else if (ctx.getStart().getText().equals("escreva")) {
-            out.print("    printf(\"%d\",");
-            ctx.expressao();
-            out.println("x);");
-        }
+//        if (ctx.getStart().getText().equals("leia")) {
+//            out.print("    scanf(\"%d\",&");
+//        } else if (ctx.getStart().getText().equals("escreva")) {
+//            out.print("    printf(\"%d\",");
+//            ctx.expressao();
+//            out.println("x);");
+//        }
     }
 
     @Override
     public void exitCmd(LAParser.CmdContext ctx) {
         /* out.println("exitCmd"); */
-        if (ctx.getStart().getText().equals("leia")) {
-            out.println(");");
-        }
+//        if (ctx.getStart().getText().equals("leia")) {
+//            out.println(");");
+//        }
     }
 
 }

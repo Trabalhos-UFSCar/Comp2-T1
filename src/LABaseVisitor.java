@@ -16,10 +16,7 @@ public class LABaseVisitor<T> extends AbstractParseTreeVisitor<T> implements LAV
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitPrograma(LAParser.ProgramaContext ctx) { 
-            System.out.println("Entrou programa");
-            return visitChildren(ctx); 
-        }
+	@Override public T visitPrograma(LAParser.ProgramaContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
