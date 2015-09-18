@@ -51,11 +51,7 @@ variavel returns [List<String> nomes]
         $nomes.add($nome.text);
         $nomes.addAll($outros.nomes);
         for(String n:$nomes){
-            if(!escopos.topo().existeSimbolo(n)){
-                escopos.adicionarSimbolo(n,$tp.text);
-            } else {
-                //reporta erro
-            }
+            escopos.adicionarSimbolo(n,$tp.text);
         }
     }
 ;
