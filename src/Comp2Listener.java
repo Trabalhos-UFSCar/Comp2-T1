@@ -96,7 +96,7 @@ public class Comp2Listener extends LABaseListener {
         } else if (ctx.getStart().getText().equals("escreva")) {
             out.print("    printf(\"%d\",");
             ctx.expressao();
-            out.println(");");
+            out.println("x);");
         }
     }
 
