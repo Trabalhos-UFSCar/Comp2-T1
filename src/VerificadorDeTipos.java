@@ -42,12 +42,14 @@ public class VerificadorDeTipos {
     }
      
     public String verificaTipo(LAParser.Fator_logicoContext ctx){
-        String tipoExp;
+        String tipoExp = verificaTipo(ctx.parcela_logica());
+        
+        // Se o operador lógico 'nao' está definido
+        // Então o resultado é lógico apenas se a expressão
+        // após o operador é também lógica
         if(ctx.op_nao() != null){
-            tipoExp = new String("logico");
-        } else {
-            tipoExp = verificaTipo(ctx.parcela_logica());
-        }
+            tipoExp = regraTipos(tipoExp, "logico");
+        } 
 
         return tipoExp;
     }
@@ -55,7 +57,7 @@ public class VerificadorDeTipos {
     public String verificaTipo(LAParser.Parcela_logicaContext ctx){
         String tipoExp;
         
-        // Verifica se é um nó folha.
+        // Verifica se é um nó folha (verdadeiro ou falso)
         // Caso contrário, continua descendo a árvore
         if(ctx.getChildCount() == 0 ){
             tipoExp = new String("logico");
@@ -69,12 +71,12 @@ public class VerificadorDeTipos {
     public String verificaTipo(LAParser.Exp_relacionalContext ctx){
         String tipoExp;
         
+        // Se existe algum operador relacional, entao resultado é logico
+        // se os dois lados da expressao podem ser comparados
         if(ctx.op_opcional() != null){
             String tipo1 = verificaTipo(ctx.exp_aritmetica());
             String tipo2 = verificaTipo(ctx.op_opcional().exp_aritmetica());
             tipoExp = regraTipos(tipo1, tipo2);
-            // Se existe algum operador relacional, entao resultado é logico
-            // se os dois lados da expressao podem ser comparados
             if (!tipoExp.equals("tipo_invalido"))
                 tipoExp = "logico";
         } else {
@@ -128,8 +130,10 @@ public class VerificadorDeTipos {
     }
     
     public String verificaTipo(LAParser.ParcelaContext ctx){
-        /* Se chegou até aqui, retorna o tipo do identificador
-        associado nas subregras da parcela */
+        /* Se chegou até aqui:
+            Pode ser real, inteiro, ou cadeia
+            Pode ser o tipo do identificador da parcela*/
+        
         return null;
     }
      
