@@ -34,7 +34,7 @@ public class Comp2 {
             
             LAVisitor v = new Comp2Visitor(out);
             v.visitPrograma(tree);
-
+            
             LAListener l = new Comp2Listener(out, parser.escopos);
             ParseTreeWalker ptw = new ParseTreeWalker();
             ptw.walk(l, tree);

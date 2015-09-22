@@ -235,7 +235,7 @@ op_nao  :  'nao' |   ;
 
 termo_logico  :  fator_logico outros_fatores_logicos ;
 
-outros_termos_logicos  :  'ou' termo_logico outros_termos_logicos |   ;
+outros_termos_logicos  :  ('ou' termo_logico)*;
 
 outros_fatores_logicos  :  'e' fator_logico outros_fatores_logicos |   ;
 
