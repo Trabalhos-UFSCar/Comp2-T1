@@ -206,11 +206,11 @@ op_adicao  :  '+' | '-' ;
 
 termo  :  fator outros_fatores ;
 
-outros_termos  :  op_adicao termo outros_termos |   ;
+outros_termos  :  (op_adicao termo)* ;
 
 fator  :  parcela outras_parcelas ;
 
-outros_fatores  :  op_multiplicacao fator outros_fatores |   ;
+outros_fatores  :  (op_multiplicacao fator)* ;
 
 parcela  :  op_unario parcela_unario | parcela_nao_unario ;
 
@@ -220,7 +220,7 @@ parcela_unario  :
 
 parcela_nao_unario  :  '&' IDENT outros_ident dimensao | CADEIA ;
 
-outras_parcelas  :  '%' parcela outras_parcelas |   ;
+outras_parcelas  :  ('%' parcela )* ;
 
 chamada_partes  :  '(' expressao mais_expressao ')' | outros_ident dimensao |   ;
 
@@ -236,9 +236,9 @@ op_nao  :  'nao' |   ;
 
 termo_logico  :  fator_logico outros_fatores_logicos ;
 
-outros_termos_logicos  :  ('ou' termo_logico)*;
+outros_termos_logicos  :  ('ou' termo_logico)* ;
 
-outros_fatores_logicos  :  'e' fator_logico outros_fatores_logicos |   ;
+outros_fatores_logicos  :  ('e' fator_logico)* ;
 
 fator_logico  :  op_nao parcela_logica ;
 
