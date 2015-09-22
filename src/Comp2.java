@@ -13,9 +13,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 public class Comp2 {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        SaidaParser sintatico = new SaidaParser(), 
-                semantico = new SaidaParser(),
-                codigoGerado = new SaidaParser();
+        SaidaParser saidaSintatico = new SaidaParser(), 
+                saidaSemantico = new SaidaParser(),
+                saidaCodigoGerado = new SaidaParser();
         ANTLRInputStream input;
         input = new ANTLRInputStream(
                 new FileInputStream(args[0]));
@@ -25,26 +25,26 @@ public class Comp2 {
 
         LAParser parser = new LAParser(tokens);
 
-        parser.setErrorHandler(new SintaticoErrorStrategy(sintatico));
+        parser.setErrorHandler(new SintaticoErrorStrategy(saidaSintatico));
         //System.out.println("OUT1:"+ sintatico.toString());
         try {
             LAParser.ProgramaContext tree = parser.programa();
             //System.out.println("OUT2:"+ sintatico.toString());
             
-            if(sintatico.toString().isEmpty()){
-                LAListener l = new Comp2Listener(semantico, parser.escopos);
+            if(saidaSintatico.toString().isEmpty()){
+                LAListener l = new Comp2Listener(saidaSemantico, parser.escopos);
                 ParseTreeWalker ptw = new ParseTreeWalker();
                 ptw.walk(l, tree);
             }
 
-            if (semantico.toString().isEmpty()) {
-                LAVisitor v = new Comp2Visitor(sintatico);
+            if (saidaSemantico.toString().isEmpty()) {
+                LAVisitor v = new Comp2Visitor(saidaSintatico);
                 v.visitPrograma(tree);
             }
 
         } catch (ParseCancellationException pce) {
-            sintatico.println(pce.getMessage());
-            sintatico.println("Fim da compilacao");
+            saidaSintatico.println(pce.getMessage());
+            saidaSintatico.println("Fim da compilacao");
         } catch (Exception e) {
             //System.out.println(e.getMessage());
         }
@@ -52,9 +52,9 @@ public class Comp2 {
         //System.out.println("OUT3:"+ out.toString());
 
         PrintWriter pw = new PrintWriter(new File(args[1]));
-        pw.print(sintatico.toString() 
-                + semantico.toString() 
-                + codigoGerado.toString());
+        pw.print(saidaSintatico.toString() 
+                + saidaSemantico.toString() 
+                + saidaCodigoGerado.toString());
         pw.flush();
         pw.close();
         
