@@ -68,14 +68,21 @@ public class VerificadorDeTipos {
     
     public String verificaTipo(LAParser.Exp_relacionalContext ctx){
         String tipoExp;
-        //Se existe algum operador relacional, entao resultado e logico
+        
         if(ctx.op_opcional() != null){
-            tipoExp = new String("logico");
+            String tipo1 = verificaTipo(ctx.exp_aritmetica());
+            String tipo2 = verificaTipo(ctx.op_opcional().exp_aritmetica());
+            tipoExp = regraTipos(tipo1, tipo2);
+            // Se existe algum operador relacional, entao resultado é logico
+            // se os dois lados da expressao podem ser comparados
+            if (!tipoExp.equals("tipo_invalido"))
+                tipoExp = "logico";
         } else {
             tipoExp = verificaTipo(ctx.exp_aritmetica());
         }
-
+        
         return tipoExp;
+
     }
     
     public String verificaTipo(LAParser.Exp_aritmeticaContext ctx){
@@ -121,6 +128,8 @@ public class VerificadorDeTipos {
     }
     
     public String verificaTipo(LAParser.ParcelaContext ctx){
+        /* Se chegou até aqui, retorna o tipo do identificador
+        associado nas subregras da parcela */
         return null;
     }
      
