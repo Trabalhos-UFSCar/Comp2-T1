@@ -46,7 +46,7 @@ public class SintaticoErrorStrategy implements ANTLRErrorStrategy {
 
     @Override
     public void sync(Parser parser) throws RecognitionException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override

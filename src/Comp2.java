@@ -13,7 +13,9 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 public class Comp2 {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        SaidaParser out = new SaidaParser();
+        SaidaParser sintatico = new SaidaParser(), 
+                semantico = new SaidaParser(),
+                codigoGerado = new SaidaParser();
         ANTLRInputStream input;
         input = new ANTLRInputStream(
                 new FileInputStream(args[0]));
@@ -23,32 +25,39 @@ public class Comp2 {
 
         LAParser parser = new LAParser(tokens);
 
-        parser.setErrorHandler(new SintaticoErrorStrategy(out));
+        parser.setErrorHandler(new SintaticoErrorStrategy(sintatico));
+        //System.out.println("OUT1:"+ sintatico.toString());
         try {
             LAParser.ProgramaContext tree = parser.programa();
-            LAListener l = new Comp2Listener(out, parser.escopos);
-            ParseTreeWalker ptw = new ParseTreeWalker();
-            ptw.walk(l, tree);
+            //System.out.println("OUT2:"+ sintatico.toString());
+            
+            if(sintatico.toString().isEmpty()){
+                LAListener l = new Comp2Listener(semantico, parser.escopos);
+                ParseTreeWalker ptw = new ParseTreeWalker();
+                ptw.walk(l, tree);
+            }
 
-            if (out.toString().isEmpty()) {
-                LAVisitor v = new Comp2Visitor(out);
+            if (semantico.toString().isEmpty()) {
+                LAVisitor v = new Comp2Visitor(sintatico);
                 v.visitPrograma(tree);
             }
 
         } catch (ParseCancellationException pce) {
-            out.println(pce.getMessage());
-            out.println("Fim da compilacao");
+            sintatico.println(pce.getMessage());
+            sintatico.println("Fim da compilacao");
         } catch (Exception e) {
-
+            //System.out.println(e.getMessage());
         }
+        
+        //System.out.println("OUT3:"+ out.toString());
 
         PrintWriter pw = new PrintWriter(new File(args[1]));
-        pw.print(out.toString());
+        pw.print(sintatico.toString() 
+                + semantico.toString() 
+                + codigoGerado.toString());
         pw.flush();
         pw.close();
-//            System.out.println();
-//        
-//        }
+        
     }
 
 }
