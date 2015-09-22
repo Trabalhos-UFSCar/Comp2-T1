@@ -8,12 +8,7 @@ import java.io.PrintWriter;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Comp2 {
 
@@ -31,13 +26,16 @@ public class Comp2 {
         parser.setErrorHandler(new Comp2ErrorStrategy(out));
         try {
             LAParser.ProgramaContext tree = parser.programa();
-            
-            LAVisitor v = new Comp2Visitor(out);
-            v.visitPrograma(tree);
 
             LAListener l = new Comp2Listener(out, parser.escopos);
             ParseTreeWalker ptw = new ParseTreeWalker();
             ptw.walk(l, tree);
+
+            if (out.toString().isEmpty()) {
+                LAVisitor v = new Comp2Visitor(out);
+                v.visitPrograma(tree);
+            }
+
         } catch (ParseCancellationException pce) {
             out.println(pce.getMessage());
             out.println("Fim da compilacao");

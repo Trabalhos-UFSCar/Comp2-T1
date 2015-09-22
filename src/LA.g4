@@ -36,15 +36,16 @@ declaracoes  :
 
 decl_local_global  :  declaracao_local | declaracao_global ;
 
-declaracao_local  :  
-    'declare' variavel 
-    | 'constante' IDENT ':' tipo_basico '=' valor_constante 
-    | 'tipo' IDENT ':' tipo ;
+declaracao_local returns [String nomeDeclaracao] :  
+    'declare' nomeV=variavel {$nomeDeclaracao = $nomeV.text;} 
+    | 'constante' nomeC=IDENT ':' tipo_basico '=' valor_constante {$nomeDeclaracao = $nomeC.text;}
+    | 'tipo' nomeT=IDENT ':' tipo {$nomeDeclaracao = $nomeT.text;}
+;
 
 
 variavel returns [List<String> nomes]
     @init{ $nomes=new ArrayList<>();} :  
-    nome=IDENT dimensao  outros=mais_var 
+    nome=IDENT dimensao outros=mais_var 
     ':' 
     tp=tipo 
     {
@@ -143,7 +144,15 @@ var_opcional  :  'var' |   ;
 
 mais_parametros  :  ',' parametro |   ;
 
-declaracoes_locais  :  declaracao_local declaracoes_locais |   ;
+declaracoes_locais returns [List<String> nomeDeclaracoes]   
+    @init{$nomeDeclaracoes=new ArrayList<>();} :
+    atual=declaracao_local outros=declaracoes_locais 
+    {
+        $nomeDeclaracoes.add($atual.nomeDeclaracao);
+        $nomeDeclaracoes.addAll($outros.nomeDeclaracoes);
+    }
+    |   
+;
 
 corpo  :  
     declaracoes_locais comandos
@@ -160,15 +169,7 @@ cmd  :
     | 'enquanto' expressao 'faca'{ escopos.empilhar("enquanto"); } comandos 'fim_enquanto' { escopos.desempilhar(); } 
     | 'faca' { escopos.empilhar("ate"); }comandos  { escopos.desempilhar(); }'ate' expressao 
     | '^' nome=IDENT outros_ident dimensao '<-' expressao 
-    {if(!escopos.existeSimbolo($nome.text)){
-        //reportar erro
-     }
-    } 
-    | nome=IDENT chamada_atribuicao
-    {if(!escopos.existeSimbolo($nome.text)){
-        //reportar erro
-     }
-    } 
+    | IDENT chamada_atribuicao
     | 'retorne' expressao ;
 
 mais_expressao  :  ',' expressao mais_expressao |   ;
