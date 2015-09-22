@@ -26,7 +26,6 @@ public class Comp2 {
         parser.setErrorHandler(new Comp2ErrorStrategy(out));
         try {
             LAParser.ProgramaContext tree = parser.programa();
-
             LAListener l = new Comp2Listener(out, parser.escopos);
             ParseTreeWalker ptw = new ParseTreeWalker();
             ptw.walk(l, tree);

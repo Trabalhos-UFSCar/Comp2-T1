@@ -178,7 +178,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         if(ctx.getStart().getText().equals("leia")){
             cmd += "scanf(\"%d\",&" + visitIdentificador(ctx.identificador()) + ");";
         }else if(ctx.getStart().getText().equals("escreva")){
-            cmd += "printf(\"%d\", " + visitExpressao(ctx.expressao()) + ");";
+            cmd += "printf(\"%"+"\", " + visitExpressao(ctx.expressao()) + ");";
         }
         
         System.out.println(ctx.getText());
