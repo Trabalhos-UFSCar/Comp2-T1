@@ -1,13 +1,8 @@
 
-import java.util.BitSet;
-import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRErrorStrategy;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.atn.ATNConfigSet;
-import org.antlr.v4.runtime.dfa.DFA;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -18,7 +13,7 @@ import org.antlr.v4.runtime.dfa.DFA;
  *
  * @author camilo
  */
-public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
+public class SintaticoErrorStrategy implements ANTLRErrorStrategy {
 
     SaidaParser out;
 
@@ -27,7 +22,7 @@ public class Comp2ErrorStrategy implements ANTLRErrorStrategy {
 
     }
 
-    public Comp2ErrorStrategy(SaidaParser out) {
+    public SintaticoErrorStrategy(SaidaParser out) {
         this.out = out;
     }
 

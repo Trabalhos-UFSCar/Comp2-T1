@@ -23,7 +23,7 @@ public class Comp2 {
 
         LAParser parser = new LAParser(tokens);
 
-        parser.setErrorHandler(new Comp2ErrorStrategy(out));
+        parser.setErrorHandler(new SintaticoErrorStrategy(out));
         try {
             LAParser.ProgramaContext tree = parser.programa();
             LAListener l = new Comp2Listener(out, parser.escopos);
