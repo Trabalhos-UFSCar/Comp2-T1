@@ -8,9 +8,7 @@
 
 grammar LA;
 
-@members{
-    Escopos escopos = new Escopos();
-    
+@members{    
     private void stop(String msg)
     {
       throw new ParseCancellationException(msg);
@@ -20,14 +18,10 @@ grammar LA;
 // Parser
 
 programa  :  
-    { escopos.empilhar("global"); }    
     declaracoes 
     'algoritmo' 
-    { escopos.empilhar("corpo"); }
     corpo
-    { escopos.desempilhar(); }
     'fim_algoritmo'
-    { escopos.desempilhar(); }
 ;
 
 declaracoes  :  
@@ -36,10 +30,10 @@ declaracoes  :
 
 decl_local_global  :  declaracao_local | declaracao_global ;
 
-declaracao_local returns [String nomeDeclaracao] :  
-    'declare' nomeV=variavel {$nomeDeclaracao = $nomeV.text;} 
-    | 'constante' nomeC=IDENT ':' tipo_basico '=' valor_constante {$nomeDeclaracao = $nomeC.text;}
-    | 'tipo' nomeT=IDENT ':' tipo {$nomeDeclaracao = $nomeT.text;}
+declaracao_local :  
+    'declare' variavel 
+    | 'constante' IDENT ':' tipo_basico '=' valor_constante
+    | 'tipo' IDENT ':' tipo
 ;
 
 
@@ -51,9 +45,6 @@ variavel returns [List<String> nomes]
     {
         $nomes.add($nome.text);
         $nomes.addAll($outros.nomes);
-        for(String n:$nomes){
-            escopos.adicionarSimbolo(n,$tp.text);
-        }
     }
 ;
 
@@ -144,14 +135,8 @@ var_opcional  :  'var' |   ;
 
 mais_parametros  :  ',' parametro |   ;
 
-declaracoes_locais returns [List<String> nomeDeclaracoes]   
-    @init{$nomeDeclaracoes=new ArrayList<>();} :
-    atual=declaracao_local outros=declaracoes_locais 
-    {
-        $nomeDeclaracoes.add($atual.nomeDeclaracao);
-        $nomeDeclaracoes.addAll($outros.nomeDeclaracoes);
-    }
-    |   
+declaracoes_locais :
+    declaracao_local declaracoes_locais |     
 ;
 
 corpo  :  
@@ -160,22 +145,24 @@ corpo  :
 
 comandos  :  cmd comandos |   ;
 
-cmd  :  
+cmd returns[String escopoNome] 
+    @init{$escopoNome="";}:  
     'leia' '(' identificador mais_ident ')' 
     | 'escreva' '(' expressao mais_expressao ')' 
-    | 'se' expressao 'entao' { escopos.empilhar("se"); }comandos senao_opcional 'fim_se'{ escopos.desempilhar(); } 
-    | 'caso' exp_aritmetica 'seja' { escopos.empilhar("caso"); } selecao senao_opcional 'fim_caso' { escopos.desempilhar(); } 
-    | 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca'{ escopos.empilhar("para"); } comandos 'fim_para' { escopos.desempilhar(); } 
-    | 'enquanto' expressao 'faca'{ escopos.empilhar("enquanto"); } comandos 'fim_enquanto' { escopos.desempilhar(); } 
-    | 'faca' { escopos.empilhar("ate"); }comandos  { escopos.desempilhar(); }'ate' expressao 
+    | 'se' expressao 'entao' { $escopoNome="se"; }comandos senao_opcional 'fim_se' 
+    | 'caso' exp_aritmetica 'seja' { $escopoNome="caso"; } selecao senao_opcional 'fim_caso' 
+    | 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca'{ $escopoNome="para"; } comandos 'fim_para' 
+    | 'enquanto' expressao 'faca'{ $escopoNome="enquanto"; } comandos 'fim_enquanto' 
+    | 'faca' { $escopoNome="ate"; }comandos 'ate' expressao 
     | '^' nome=IDENT outros_ident dimensao '<-' expressao 
     | IDENT chamada_atribuicao
     | 'retorne' expressao ;
 
 mais_expressao  :  ',' expressao mais_expressao |   ;
 
-senao_opcional  :  
-    'senao' { escopos.empilhar("senao"); }comandos{ escopos.desempilhar(); } 
+senao_opcional returns [String escopoNome] 
+    @init{$escopoNome="";}:  
+    'senao' { $escopoNome="senao"; }comandos 
     |   ;
 
 chamada_atribuicao  :  

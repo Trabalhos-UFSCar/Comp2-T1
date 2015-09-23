@@ -32,7 +32,7 @@ public class Comp2 {
             //System.out.println("OUT2:"+ sintatico.toString());
             
             if(saidaSintatico.toString().isEmpty()){
-                LAListener l = new Comp2Listener(saidaSemantico, parser.escopos);
+                LAListener l = new Comp2Listener(saidaSemantico);
                 ParseTreeWalker ptw = new ParseTreeWalker();
                 ptw.walk(l, tree);
             }
@@ -40,6 +40,8 @@ public class Comp2 {
             if (saidaSemantico.toString().isEmpty()) {
                 LAVisitor v = new Comp2Visitor(saidaSintatico);
                 v.visitPrograma(tree);
+            } else {
+                saidaSemantico.println("Fim da compilacao");
             }
 
         } catch (ParseCancellationException pce) {

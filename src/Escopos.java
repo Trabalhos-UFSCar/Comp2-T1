@@ -35,10 +35,8 @@ public class Escopos {
         topo().adicionarSimbolo(nome, tipo, dimensao);
     }
 
-    public void desempilhar() {
-        TabelaDeSimbolos ts = pilha.pop();
-        System.out.println(ts.toString());
-
+    public TabelaDeSimbolos desempilhar() {
+        return pilha.pop();
     }
 
     public List getTodasTabelas() {
