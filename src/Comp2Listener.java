@@ -8,6 +8,10 @@ public class Comp2Listener extends LABaseListener {
     Escopos escopos;
     Map<String, String> tipo;
 
+    //Essa variavel é usada para contornar a dificuldade que é decidir o tipo de uma variavel
+    //enquanto na regra mais_var. 
+    String tipoAtual = "";
+
     public Comp2Listener(SaidaParser out) {
         this.out = out;
         this.escopos = new Escopos();
@@ -42,15 +46,14 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterCmd(LAParser.CmdContext ctx) {
-        if(!ctx.escopoNome.isEmpty()){
+        if (!ctx.escopoNome.isEmpty()) {
             escopos.empilhar(ctx.escopoNome);
         }
     }
 
-    
     @Override
     public void exitCmd(LAParser.CmdContext ctx) {
-        if(!ctx.escopoNome.isEmpty()){
+        if (!ctx.escopoNome.isEmpty()) {
             escopos.desempilhar();
         }
     }
@@ -65,30 +68,48 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
-        for (String n : ctx.nomes) {
-            escopos.adicionarSimbolo(n, ctx.tp.getText());
+        String nome = ctx.nome.getText();
+        tipoAtual = ctx.tipo().getText();
+        if (!escopos.existeSimbolo(nome)) {
+            escopos.adicionarSimbolo(nome, tipoAtual);
+        } else {
+            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
         }
 
         if (tipo.get(ctx.tipo().getText()) == null) {
-            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": tipo " + ctx.tipo().getText() + " nao declarado");
+            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": tipo " + tipoAtual + " nao declarado");
         }
+    }
 
-//        if (escopos.existeSimbolo(ctx.IDENT().getSymbol().getText())) {
-//            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT() + " ja declarado anteriormente");
-//        } else {
-//            System.out.println("Variavel adicionada. Linha: " + ctx.IDENT().getSymbol().getLine() + " : " + ctx.IDENT().getSymbol().getText());
-//        }
+    @Override
+    public void exitVariavel(LAParser.VariavelContext ctx) {
+        tipoAtual = "";
     }
 
     @Override
     public void enterMais_var(LAParser.Mais_varContext ctx) {
-        //TODO: corrigir bug: o erro não está sendo adicionada corretamente quando ele ocorre
-//        if (escopos.existeSimbolo(ctx.IDENT().getText())) {
-//            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT() + " ja declarado anteriormente");
-//        } else {
-//            System.out.println("Variavel adicionada. Linha: " + ctx.IDENT().getSymbol().getLine() + " : " + ctx.IDENT());
-//        }
+        String nome;
+        //essa checagem é necessário pois na ultima iteração do mais_var ele tera um IDENT nulo
+        //pois não tem nada nela
+        if (ctx.nome != null) {
+            nome = ctx.nome.getText();
 
+            if (!escopos.existeSimbolo(nome)) {
+                escopos.adicionarSimbolo(nome, tipoAtual);
+            } else {
+                out.println("Linha " + ctx.nome.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+            }
+        }
+    }
+
+    @Override
+    public void enterParcela_unario(LAParser.Parcela_unarioContext ctx) {
+        //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador
+        if (ctx.IDENT() != null) {
+             if (!escopos.existeSimbolo(ctx.IDENT().getText())){
+                 out.println("Linha "+ctx.IDENT().getSymbol().getLine()+": identificador "+ctx.IDENT().getText()+" nao declarado");
+             }
+        }
     }
 
 }

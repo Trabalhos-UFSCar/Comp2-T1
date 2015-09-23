@@ -37,26 +37,14 @@ declaracao_local :
 ;
 
 
-variavel returns [List<String> nomes]
-    @init{ $nomes=new ArrayList<>();} :  
-    nome=IDENT dimensao outros=mais_var 
+variavel :  
+    nome=IDENT dimensao mais_var 
     ':' 
     tp=tipo 
-    {
-        $nomes.add($nome.text);
-        $nomes.addAll($outros.nomes);
-    }
 ;
 
-mais_var returns [List<String> nomes] 
-    @init{$nomes=new ArrayList<>();} :
-  
-    ',' nome=IDENT dimensao outros=mais_var
-    {
-        $nomes.add($nome.text);
-        $nomes.addAll($outros.nomes);
-    } 
-    |   
+mais_var :  
+    ',' nome=IDENT dimensao mais_var |   
 ;
 
 identificador  :  
@@ -64,8 +52,7 @@ identificador  :
 ;
 
 ponteiros_opcionais  :  
-    '^' ponteiros_opcionais 
-    |   
+    '^' ponteiros_opcionais |   
 ;
 
 outros_ident  :  
@@ -201,7 +188,7 @@ outros_fatores  :  (op_multiplicacao fator)* ;
 
 parcela  :  op_unario parcela_unario | parcela_nao_unario ;
 
-parcela_unario  :  
+parcela_unario :  
     '^' IDENT outros_ident dimensao 
     | IDENT chamada_partes | NUM_INT | NUM_REAL | '(' expressao ')' ;
 
