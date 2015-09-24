@@ -55,8 +55,8 @@ public class VerificadorDeTipos {
 
         // Verifica se é um nó folha (verdadeiro ou falso)
         // Caso contrário, continua descendo a árvore
-        if (ctx.getChildCount() == 0) {
-            tipoExp = new String("logico");
+        if (ctx.getChildCount() == 0 || ctx.exp_relacional()==null) {
+            tipoExp = "logico";
         } else {
             tipoExp = verificaTipo(ctx.exp_relacional());
         }

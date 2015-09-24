@@ -70,14 +70,14 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.nome.getText();
-        tipoAtual = ctx.tipo().getText();
+        tipoAtual = ctx.tipo().getText().replace("^", "");
         if (!escopos.existeSimbolo(nome)) {
             escopos.adicionarSimbolo(nome, tipoAtual);
         } else {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
         }
 
-        if (tipo.get(ctx.tipo().getText()) == null) {
+        if (tipo.get(tipoAtual) == null) {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": tipo " + tipoAtual + " nao declarado");
         }
     }
@@ -115,15 +115,18 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
-       if(ctx.expressao()!=null){
-           String nome = ((LAParser.CmdContext)ctx.parent).IDENT().getText();
-           String tipo = escopos.buscaSimbolo(nome).getTipo();
-           
-           if(!vdt.verificaTipo(ctx).equals(tipo)){
-               Integer linha = ((LAParser.CmdContext)ctx.parent).IDENT().getSymbol().getLine();
-              out.println("Linha "+linha+": atribuicao nao compativel para "+nome);
-           }
-       }
+        if (ctx.expressao() != null) {
+            String nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
+            String aux = escopos.buscaSimbolo(nome).getTipo();
+            if (((LAParser.CmdContext) ctx.parent).getText().contains("^")) {
+                nome = "^" + nome;
+            }
+
+            if (VerificadorDeTipos.regraTipos(vdt.verificaTipo(ctx), aux).equals("tipo_invalido")) {
+                Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
+                out.println("Linha " + linha + ": atribuicao nao compativel para " + nome);
+            }
+        }
     }
 
 }

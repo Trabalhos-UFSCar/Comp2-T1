@@ -141,7 +141,7 @@ cmd returns[String escopoNome]
     | 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca'{ $escopoNome="para"; } comandos 'fim_para' 
     | 'enquanto' expressao 'faca'{ $escopoNome="enquanto"; } comandos 'fim_enquanto' 
     | 'faca' { $escopoNome="ate"; }comandos 'ate' expressao 
-    | '^' nome=IDENT outros_ident dimensao '<-' expressao 
+    | '^'IDENT chamada_atribuicao 
     | IDENT chamada_atribuicao
     | 'retorne' expressao ;
 
