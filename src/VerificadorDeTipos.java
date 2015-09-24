@@ -90,10 +90,7 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Exp_aritmeticaContext ctx) {
-        String tipoExp = "";
-
-        if (ctx.termo() != null) {
-            tipoExp = verificaTipo(ctx.termo());
+        String tipoExp = verificaTipo(ctx.termo());
             if (ctx.outros_termos() == null) {
                 return tipoExp;
             } else {
@@ -104,7 +101,7 @@ public class VerificadorDeTipos {
                     }
                 }
             }
-        }
+        
         return tipoExp;
     }
 
@@ -113,11 +110,9 @@ public class VerificadorDeTipos {
         if (ctx.outros_fatores() == null) {
             return tipoExp;
         } else {
-            if (ctx.outros_fatores().fator() != null) {
-                for (LAParser.FatorContext termo : ctx.outros_fatores().fator()) {
-                    String tipoOutroTermo = verificaTipo(termo);
-                    tipoExp = regraTipos(tipoExp, tipoOutroTermo);
-                }
+            for (LAParser.FatorContext termo : ctx.outros_fatores().fator()) {
+                String tipoOutroTermo = verificaTipo(termo);
+                tipoExp = regraTipos(tipoExp, tipoOutroTermo);
             }
         }
 
@@ -182,7 +177,6 @@ public class VerificadorDeTipos {
         } else if (tipo1.equals("real") && tipo2.equals("inteiro")
                 || tipo2.equals("real") && tipo1.equals("inteiro")) {
             return "real";
-
         } else {
             return "tipo_invalido";
         }
