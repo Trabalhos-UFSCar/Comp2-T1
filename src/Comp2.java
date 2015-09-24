@@ -26,10 +26,8 @@ public class Comp2 {
         LAParser parser = new LAParser(tokens);
 
         parser.setErrorHandler(new SintaticoErrorStrategy(saidaSintatico));
-        //System.out.println("OUT1:"+ sintatico.toString());
         try {
             LAParser.ProgramaContext tree = parser.programa();
-            //System.out.println("OUT2:"+ sintatico.toString());
             
             if(saidaSintatico.toString().isEmpty()){
                 LAListener l = new Comp2Listener(saidaSemantico);
@@ -38,20 +36,22 @@ public class Comp2 {
             }
 
             if (saidaSemantico.toString().isEmpty()) {
-                LAVisitor v = new Comp2Visitor(saidaSintatico);
+                LAVisitor v = new Comp2Visitor(saidaCodigoGerado);
                 v.visitPrograma(tree);
-            } else {
-                saidaSemantico.println("Fim da compilacao");
             }
 
         } catch (ParseCancellationException pce) {
             saidaSintatico.println(pce.getMessage());
-            saidaSintatico.println("Fim da compilacao");
         } catch (Exception e) {
-            //System.out.println(e.getMessage());
+            System.out.println("Erro:" + e.getMessage());
         }
         
-        //System.out.println("OUT3:"+ out.toString());
+        if(!saidaSintatico.toString().isEmpty() || !saidaSemantico.toString().isEmpty())
+            saidaCodigoGerado.println("Fim da compilacao");
+        
+        System.out.println("Sintatico:\n"+ saidaSintatico.toString() 
+                + "\nSemantico:\n"+ saidaSemantico.toString() 
+                + "\nCódigo:\n"+ saidaCodigoGerado.toString());
 
         PrintWriter pw = new PrintWriter(new File(args[1]));
         pw.print(saidaSintatico.toString() 

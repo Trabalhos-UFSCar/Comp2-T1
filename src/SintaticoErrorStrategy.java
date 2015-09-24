@@ -33,8 +33,6 @@ public class SintaticoErrorStrategy implements ANTLRErrorStrategy {
         
         out.println("Linha " + parser.getCurrentToken().getLine()
                 + ": erro sintatico proximo a " + tkName);
-
-        out.println("Fim da compilacao");
         parser.reset();
         return null;
     }
@@ -65,8 +63,6 @@ public class SintaticoErrorStrategy implements ANTLRErrorStrategy {
         if(tkName.equals("<EOF>")) tkName = "EOF";
         out.println("Linha " + re.getOffendingToken().getLine()
                 + ": erro sintatico proximo a " + tkName);
-
-        out.println("Fim da compilacao");
         parser.reset();
     }
 
