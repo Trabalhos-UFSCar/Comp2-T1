@@ -74,7 +74,7 @@ public class VerificadorDeTipos {
 
         // Se existe algum operador relacional, entao resultado é logico
         // se os dois lados da expressao podem ser comparados
-        if (ctx.op_opcional() != null) {
+        if (!ctx.op_opcional().getText().isEmpty()) {
             String tipo1 = verificaTipo(ctx.exp_aritmetica());
             String tipo2 = verificaTipo(ctx.op_opcional().exp_aritmetica());
             tipoExp = regraTipos(tipo1, tipo2);
