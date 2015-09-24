@@ -1,13 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/**
- *
- * @author Jp
- */
 public class VerificadorDeTipos {
 
     Escopos escopos;
@@ -17,8 +8,9 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.ExpressaoContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.termo_logico());
-        if (ctx.outros_termos_logicos() == null) {
+        if (ctx.outros_termos_logicos() == null || ctx.outros_termos_logicos().getText().isEmpty()) {
             return tipoExp;
         } else {
             for (LAParser.Termo_logicoContext termo : ctx.outros_termos_logicos().termo_logico()) {
@@ -30,8 +22,9 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Termo_logicoContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.fator_logico());
-        if (ctx.outros_fatores_logicos() == null) {
+        if (ctx.outros_fatores_logicos() == null || ctx.outros_fatores_logicos().getText().isEmpty()) {
             return tipoExp;
         } else {
             for (LAParser.Fator_logicoContext termo : ctx.outros_fatores_logicos().fator_logico()) {
@@ -43,12 +36,13 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Fator_logicoContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.parcela_logica());
 
         // Se o operador lógico 'nao' está definido
         // Então o resultado é lógico apenas se a expressão
         // após o operador é também lógica
-        if (!ctx.op_nao().getText().isEmpty()) {
+        if (ctx.op_nao() != null && !ctx.op_nao().getText().isEmpty()) {
             tipoExp = regraTipos(tipoExp, "logico");
         }
 
@@ -56,6 +50,7 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Parcela_logicaContext ctx) {
+        String text = ctx.getText();
         String tipoExp;
 
         // Verifica se é um nó folha (verdadeiro ou falso)
@@ -70,11 +65,12 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Exp_relacionalContext ctx) {
+        String text = ctx.getText();
         String tipoExp;
 
         // Se existe algum operador relacional, entao resultado é logico
         // se os dois lados da expressao podem ser comparados
-        if (!ctx.op_opcional().getText().isEmpty()) {
+        if (ctx.op_opcional() != null && !ctx.op_opcional().getText().isEmpty()) {
             String tipo1 = verificaTipo(ctx.exp_aritmetica());
             String tipo2 = verificaTipo(ctx.op_opcional().exp_aritmetica());
             tipoExp = regraTipos(tipo1, tipo2);
@@ -90,15 +86,14 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Exp_aritmeticaContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.termo());
-        if (ctx.outros_termos() == null) {
+        if (ctx.outros_termos() == null || ctx.outros_termos().getText().isEmpty()) {
             return tipoExp;
         } else {
-            if (ctx.outros_termos().termo() != null) {
-                for (LAParser.TermoContext termo : ctx.outros_termos().termo()) {
-                    String tipoOutroTermo = verificaTipo(termo);
-                    tipoExp = regraTipos(tipoExp, tipoOutroTermo);
-                }
+            for (LAParser.TermoContext termo : ctx.outros_termos().termo()) {
+                String tipoOutroTermo = verificaTipo(termo);
+                tipoExp = regraTipos(tipoExp, tipoOutroTermo);
             }
         }
 
@@ -106,8 +101,9 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.TermoContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.fator());
-        if (ctx.outros_fatores() == null) {
+        if (ctx.outros_fatores() == null || ctx.outros_fatores().getText().isEmpty()) {
             return tipoExp;
         } else {
             for (LAParser.FatorContext termo : ctx.outros_fatores().fator()) {
@@ -120,8 +116,9 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.FatorContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.parcela());
-        if (ctx.outras_parcelas() == null) {
+        if (ctx.outras_parcelas() == null || ctx.outras_parcelas().getText().isEmpty()) {
             return tipoExp;
         } else {
             for (LAParser.ParcelaContext termo : ctx.outras_parcelas().parcela()) {
@@ -134,8 +131,9 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.ParcelaContext ctx) {
+        String text = ctx.getText();
         String tipoExp;
-        if (ctx.parcela_unario() != null) {
+        if (ctx.parcela_unario() != null && !ctx.parcela_unario().getText().isEmpty()) {
             tipoExp = verificaTipo(ctx.parcela_unario());
         } else {
             tipoExp = verificaTipo(ctx.parcela_nao_unario());
@@ -172,26 +170,29 @@ public class VerificadorDeTipos {
     }
 
     public String verificaTipo(LAParser.Chamada_atribuicaoContext ctx) {
+        String text = ctx.getText();
         String tipo1 = verificaTipo(ctx.expressao());
-        if (ctx.outros_ident() == null || ctx.outros_ident().identificador() == null) {
+        if (ctx.outros_ident() == null || ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
             return tipo1;
         } else {
             String tipo2 = verificaTipo(ctx.outros_ident());
-
+            
             return regraTipos(tipo1, tipo2);
         }
 
     }
 
     public String verificaTipo(LAParser.Outros_identContext ctx) {
+        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.identificador());
 
         return tipoExp;
     }
 
     public String verificaTipo(LAParser.IdentificadorContext ctx) {
+        String text = ctx.getText();
         String tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
-        if (ctx.outros_ident() == null || ctx.outros_ident().identificador() == null) {
+        if (ctx.outros_ident() == null && ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
             return tipoExp;
         } else {
 
