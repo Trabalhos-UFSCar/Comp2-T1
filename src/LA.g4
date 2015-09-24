@@ -145,7 +145,7 @@ cmd returns[String escopoNome]
     | IDENT chamada_atribuicao
     | 'retorne' expressao ;
 
-mais_expressao  :  ',' expressao mais_expressao |   ;
+mais_expressao  :  (',' expressao )*;
 
 senao_opcional returns [String escopoNome] 
     @init{$escopoNome="";}:  
