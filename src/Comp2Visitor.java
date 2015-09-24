@@ -74,7 +74,6 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { 
-        System.out.println("Passei delcaracoes");
 //        out.print();
         return visitChildren(ctx); 
     }
@@ -104,15 +103,28 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         String nome = ctx.nome.getText();
         tipoAtual = ctx.tipo().getText();
         escopos.adicionarSimbolo(nome, tipoAtual);
+        System.out.println(ctx.getText());
         
-        String variavel = 
-         tipo.get(tipoAtual) +
-         " " +
-         nome + 
-         visitDimensao(ctx.dimensao()) +
-         visitMais_var(ctx.mais_var()) +
-         ";"
-        ;
+        String variavel = "";
+        if(tipoAtual.equals("literal")){
+            variavel =
+             tipo.get(tipoAtual) +
+             " " +
+             nome +
+             "[80]" +
+             visitMais_var(ctx.mais_var()) +
+            ";"
+           ;
+        }else{
+            variavel = 
+             tipo.get(tipoAtual) +
+             " " +
+             nome + 
+             visitDimensao(ctx.dimensao()) +
+             visitMais_var(ctx.mais_var()) +
+             ";"
+            ;
+        }
         
         out.println(variavel);
         
@@ -125,6 +137,8 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         if(regraVazia(ctx)){
             return (T) "";
         }
+        
+        System.out.println(ctx.getText());
         
         String dimensao = 
          "[" +
@@ -150,7 +164,6 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
-        System.out.println("passei global");
 //        out.println("global");
         return visitChildren(ctx); 
     }
@@ -202,18 +215,18 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
                 cmd += "scanf(\"%d\",&" + nome + ");";
             }else if(tipo.equals("real")){
                 cmd += "scanf(\"%f\",&" + nome + ");";
+            }else if(tipo.equals("literal")){
+                cmd += "gets(" + nome + ");";
             }
         }else if(ctx.getStart().getText().equals("escreva")){
-            
-            System.out.println("Passei cmd");
             if(vdt.verificaTipo(ctx.expressao()).equals("inteiro")){
                 cmd += "printf(\"%d"+"\", " + visitExpressao(ctx.expressao()) + ");";
             }else if(vdt.verificaTipo(ctx.expressao()).equals("real")){
                 cmd += "printf(\"%f"+"\", " + visitExpressao(ctx.expressao()) + ");";
+            }else if(vdt.verificaTipo(ctx.expressao()).equals("literal")){
+                cmd += "printf(\"%s\", " + visitExpressao(ctx.expressao()) + ");";
             }
         }
-        
-        System.out.println(ctx.getText());
         
         out.println(cmd);
         
@@ -222,7 +235,6 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     
     @Override public T visitExpressao(LAParser.ExpressaoContext ctx) { 
         String expressao = "";
-        System.out.println(ctx.getText());
         
         expressao = (String) visitExp_aritmetica(ctx.termo_logico().fator_logico().parcela_logica().exp_relacional().exp_aritmetica());
         
