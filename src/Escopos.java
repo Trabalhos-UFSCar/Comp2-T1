@@ -26,6 +26,17 @@ public class Escopos {
         }
         return false;
     }
+    
+    public EntradaTabelaDeSimbolos buscaSimbolo(String nome) {
+        for (TabelaDeSimbolos ts : pilha) {
+            for(EntradaTabelaDeSimbolos entrada:ts.todosSimbolos()){
+                if(entrada.getNome().equals(nome)){
+                    return entrada;
+                }
+            }
+        }
+        return null;
+    }
 
     public void adicionarSimbolo(String nome, String tipo) {
         topo().adicionarSimbolo(nome, tipo);

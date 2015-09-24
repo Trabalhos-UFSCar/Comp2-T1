@@ -7,6 +7,7 @@ public class Comp2Listener extends LABaseListener {
     SaidaParser out;
     Escopos escopos;
     Map<String, String> tipo;
+    VerificadorDeTipos vdt;
 
     //Essa variavel é usada para contornar a dificuldade que é decidir o tipo de uma variavel
     //enquanto na regra mais_var. 
@@ -16,6 +17,7 @@ public class Comp2Listener extends LABaseListener {
         this.out = out;
         this.escopos = new Escopos();
         this.tipo = new HashMap<>();
+        this.vdt = new VerificadorDeTipos(escopos);
 
         // add os tipos em LA (key) e C (value)
         tipo.put("inteiro", "int");
@@ -60,7 +62,6 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterIdentificador(LAParser.IdentificadorContext ctx) {
-        System.out.println("identificador=" + ctx.IDENT().getText() + " Existe: " + escopos.existeSimbolo(ctx.IDENT().getText()));
         if (!escopos.existeSimbolo(ctx.IDENT().getText())) {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT() + " nao declarado");
         }
@@ -106,10 +107,17 @@ public class Comp2Listener extends LABaseListener {
     public void enterParcela_unario(LAParser.Parcela_unarioContext ctx) {
         //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador
         if (ctx.IDENT() != null) {
-             if (!escopos.existeSimbolo(ctx.IDENT().getText())){
-                 out.println("Linha "+ctx.IDENT().getSymbol().getLine()+": identificador "+ctx.IDENT().getText()+" nao declarado");
-             }
+            if (!escopos.existeSimbolo(ctx.IDENT().getText())) {
+                out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT().getText() + " nao declarado");
+            }
         }
+    }
+
+    @Override
+    public void enterChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
+       if(ctx.expressao()!=null){
+           System.out.println(vdt.verificaTipo(ctx.expressao()));
+       }
     }
 
 }
