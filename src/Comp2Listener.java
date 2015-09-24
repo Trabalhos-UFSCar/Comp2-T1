@@ -116,7 +116,13 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
        if(ctx.expressao()!=null){
-           System.out.println(vdt.verificaTipo(ctx.expressao()));
+           String nome = ((LAParser.CmdContext)ctx.parent).IDENT().getText();
+           String tipo = escopos.buscaSimbolo(nome).getTipo();
+           
+           if(!vdt.verificaTipo(ctx).equals(tipo)){
+               Integer linha = ((LAParser.CmdContext)ctx.parent).IDENT().getSymbol().getLine();
+              out.println("Linha "+linha+": atribuicao nao compativel para "+nome);
+           }
        }
     }
 
