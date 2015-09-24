@@ -220,7 +220,7 @@ parcela_logica  :  'verdadeiro' | 'falso' | exp_relacional ;
 
 // Lexer
 
-CADEIA : '"' ~[\r\n]* '"';
+CADEIA : '"' ( '\\"' | . )~('\n'|'\r')*? '"';
 
 IDENT : [_a-zA-Z][_a-zA-Z0-9]*;
 
@@ -228,10 +228,10 @@ NUM_INT : [0-9]+;
 
 NUM_REAL : [0-9]+'.'[0-9]+;
 
-COMENTARIO : '{' .*? '}' -> skip;
+COMENTARIO : '{' ~[}]* '}' -> skip;
 
 COMENTARIO_ERRADO
-    : '{' ~('\r'|'\n'|'}')* '\n' 
+    : '{' ~[\r\n}]* '\n' 
       { stop("Linha " + getLine() + ": comentario nao fechado"); }
     ;
 
