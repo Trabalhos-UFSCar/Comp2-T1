@@ -48,7 +48,7 @@ public class VerificadorDeTipos {
         // Se o operador lógico 'nao' está definido
         // Então o resultado é lógico apenas se a expressão
         // após o operador é também lógica
-        if (ctx.op_nao() != null) {
+        if (!ctx.op_nao().getText().isEmpty()) {
             tipoExp = regraTipos(tipoExp, "logico");
         }
 
