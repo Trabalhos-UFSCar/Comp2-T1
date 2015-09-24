@@ -91,17 +91,17 @@ public class VerificadorDeTipos {
 
     public String verificaTipo(LAParser.Exp_aritmeticaContext ctx) {
         String tipoExp = verificaTipo(ctx.termo());
-            if (ctx.outros_termos() == null) {
-                return tipoExp;
-            } else {
-                if (ctx.outros_termos().termo() != null) {
-                    for (LAParser.TermoContext termo : ctx.outros_termos().termo()) {
-                        String tipoOutroTermo = verificaTipo(termo);
-                        tipoExp = regraTipos(tipoExp, tipoOutroTermo);
-                    }
+        if (ctx.outros_termos() == null) {
+            return tipoExp;
+        } else {
+            if (ctx.outros_termos().termo() != null) {
+                for (LAParser.TermoContext termo : ctx.outros_termos().termo()) {
+                    String tipoOutroTermo = verificaTipo(termo);
+                    tipoExp = regraTipos(tipoExp, tipoOutroTermo);
                 }
             }
-        
+        }
+
         return tipoExp;
     }
 
@@ -167,6 +167,37 @@ public class VerificadorDeTipos {
             tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
         } else {
             tipoExp = "literal";
+        }
+        return tipoExp;
+    }
+
+    public String verificaTipo(LAParser.Chamada_atribuicaoContext ctx) {
+        String tipo1 = verificaTipo(ctx.expressao());
+        if (ctx.outros_ident() == null || ctx.outros_ident().identificador() == null) {
+            return tipo1;
+        } else {
+            String tipo2 = verificaTipo(ctx.outros_ident());
+
+            return regraTipos(tipo1, tipo2);
+        }
+
+    }
+
+    public String verificaTipo(LAParser.Outros_identContext ctx) {
+        String tipoExp = verificaTipo(ctx.identificador());
+
+        return tipoExp;
+    }
+
+    public String verificaTipo(LAParser.IdentificadorContext ctx) {
+        String tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
+        if (ctx.outros_ident() == null || ctx.outros_ident().identificador() == null) {
+            return tipoExp;
+        } else {
+
+            String tipoOutroTermo = verificaTipo(ctx.outros_ident().identificador());
+            tipoExp = regraTipos(tipoExp, tipoOutroTermo);
+
         }
         return tipoExp;
     }
