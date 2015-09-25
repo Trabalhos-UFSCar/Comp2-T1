@@ -44,7 +44,7 @@ variavel :
 ;
 
 mais_var :  
-    ',' nome=IDENT dimensao mais_var |   
+    (',' nome=IDENT dimensao)*
 ;
 
 identificador  :  
@@ -156,7 +156,7 @@ chamada_atribuicao  :
     '(' argumentos_opcional ')' 
     | outros_ident dimensao '<-' expressao ;
 
-argumentos_opcional  :  expressao mais_expressao |   ;
+argumentos_opcional  :  expressao mais_expressao | ;
 
 selecao  :  constantes ':' comandos mais_selecao ;
 
