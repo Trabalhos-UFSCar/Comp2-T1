@@ -246,11 +246,36 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             out.identationLevel--;
             
             cmd = "}";
+            out.println(cmd);
+            
+            visitSenao_opcional(ctx.senao_opcional());
+            cmd = "";
         }
         
         out.println(cmd);
         
         return null; 
+    }
+    
+    @Override public T visitSenao_opcional(LAParser.Senao_opcionalContext ctx) { 
+        if(regraVazia(ctx)){
+            return null;
+        }
+        String senao_opcional = "";
+        
+        senao_opcional += "else{";
+        out.println(senao_opcional);
+        
+        out.identationLevel++;
+        this.escopos.empilhar(ctx.escopoNome);
+        visitComandos(ctx.comandos());
+        this.escopos.desempilhar();
+        out.identationLevel--;
+        
+        senao_opcional = "}";
+        out.println(senao_opcional);
+        
+        return null;
     }
     
     @Override public T visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) { 
@@ -332,7 +357,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         
         expressao += (String)visitTermo_logico(ctx.termo_logico());
         for(int i=0; i<ctx.outros_termos_logicos().termo_logico().size(); i++){
-            expressao += "||" + (String)visitTermo_logico(ctx.outros_termos_logicos().termo_logico(i));
+            expressao += " || " + (String)visitTermo_logico(ctx.outros_termos_logicos().termo_logico(i));
         }
         
         return (T) expressao; 
@@ -343,7 +368,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         
         termo_logico += (String)visitFator_logico(ctx.fator_logico());
         for(int i=0; i<ctx.outros_fatores_logicos().fator_logico().size(); i++){
-            termo_logico += "&&" + (String)visitFator_logico(ctx.outros_fatores_logicos().fator_logico(i));
+            termo_logico += " && " + (String)visitFator_logico(ctx.outros_fatores_logicos().fator_logico(i));
         }
         
         return (T)termo_logico; 
