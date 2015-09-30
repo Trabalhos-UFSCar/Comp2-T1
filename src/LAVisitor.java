@@ -202,23 +202,11 @@ public interface LAVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSelecao(LAParser.SelecaoContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LAParser#mais_selecao}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMais_selecao(LAParser.Mais_selecaoContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link LAParser#constantes}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitConstantes(LAParser.ConstantesContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link LAParser#mais_constantes}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMais_constantes(LAParser.Mais_constantesContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link LAParser#numero_intervalo}.
 	 * @param ctx the parse tree

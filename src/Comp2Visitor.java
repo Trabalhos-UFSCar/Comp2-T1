@@ -248,8 +248,27 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             cmd = "}";
             out.println(cmd);
             
-            visitSenao_opcional(ctx.senao_opcional());
+            if(!regraVazia(ctx.senao_opcional())){
+                out.println("else{");
+                visitSenao_opcional(ctx.senao_opcional());
+                out.println("}");
+            }
             cmd = "";
+        }else if(ctx.getStart().getText().equals("caso")){
+            cmd += "switch (" + (String)visitExp_aritmetica(ctx.exp_aritmetica(0)) + "){";
+            out.println(cmd);
+            
+            out.identationLevel++;
+            this.escopos.empilhar(ctx.escopoNome);
+            visitSelecao(ctx.selecao());
+            if(!regraVazia(ctx.senao_opcional())){
+                cmd = "default:";
+                out.println(cmd);
+                visitSenao_opcional(ctx.senao_opcional());
+            }
+            this.escopos.desempilhar();
+            out.identationLevel--;
+            cmd = "}";
         }
         
         out.println(cmd);
@@ -257,23 +276,53 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitSenao_opcional(LAParser.Senao_opcionalContext ctx) { 
-        if(regraVazia(ctx)){
-            return null;
+    @Override public T visitSelecao(LAParser.SelecaoContext ctx) {        
+        for(int i=0; i<ctx.constantes().size(); i++){
+            visitConstantes(ctx.constantes(i));
+            out.identationLevel++;
+            visitComandos(ctx.comandos(i));
+            out.println("break;");
+            out.identationLevel--;
         }
-        String senao_opcional = "";
         
-        senao_opcional += "else{";
-        out.println(senao_opcional);
+        return null; 
+    }
+    
+    @Override public T visitConstantes(LAParser.ConstantesContext ctx) {
+        for(int i=0; i<ctx.numero_intervalo().size(); i++){
+            String valorInicialString = "";
+            if(!regraVazia(ctx.numero_intervalo(i).op_unario())){
+                valorInicialString += "-";
+            }
+            valorInicialString += ctx.numero_intervalo(i).NUM_INT().getText();
+            int valorInicial = Integer.parseInt(valorInicialString);
+            
+            int valorFinal=valorInicial;
+            if(!regraVazia(ctx.numero_intervalo(i).intervalo_opcional())){
+                String valorFinalString = "";
+                if(!regraVazia(ctx.numero_intervalo(i).intervalo_opcional().op_unario())){
+                    valorFinalString += "-";
+                }
+                valorFinalString += ctx.numero_intervalo(i).intervalo_opcional().NUM_INT().getText();
+                valorFinal = Integer.parseInt(valorFinalString);
+            }
+            
+            for(int j=valorInicial; j<=valorFinal; j++){
+                out.println("case "+j+":");
+            }
+        }
+        
+        return null; 
+    }
+    
+    @Override public T visitSenao_opcional(LAParser.Senao_opcionalContext ctx) { 
+        String senao_opcional = "";
         
         out.identationLevel++;
         this.escopos.empilhar(ctx.escopoNome);
         visitComandos(ctx.comandos());
         this.escopos.desempilhar();
         out.identationLevel--;
-        
-        senao_opcional = "}";
-        out.println(senao_opcional);
         
         return null;
     }

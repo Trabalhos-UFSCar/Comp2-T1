@@ -399,18 +399,6 @@ public class LABaseListener implements LAListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMais_selecao(LAParser.Mais_selecaoContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMais_selecao(LAParser.Mais_selecaoContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterConstantes(LAParser.ConstantesContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -418,18 +406,6 @@ public class LABaseListener implements LAListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitConstantes(LAParser.ConstantesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterMais_constantes(LAParser.Mais_constantesContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMais_constantes(LAParser.Mais_constantesContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

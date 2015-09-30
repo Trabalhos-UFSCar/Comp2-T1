@@ -158,13 +158,9 @@ chamada_atribuicao  :
 
 argumentos_opcional  :  expressao mais_expressao | ;
 
-selecao  :  constantes ':' comandos mais_selecao ;
+selecao  :  (constantes ':' comandos)+ ;
 
-mais_selecao  :  selecao |   ;
-
-constantes  :  numero_intervalo mais_constantes ;
-
-mais_constantes  :  ',' constantes |   ;
+constantes  :  numero_intervalo (',' numero_intervalo)* ;
 
 numero_intervalo  :  op_unario NUM_INT intervalo_opcional ;
 
