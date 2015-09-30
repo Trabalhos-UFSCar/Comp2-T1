@@ -235,6 +235,17 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             }
             cmd += ctx.IDENT().getText() + (String)visitChamada_atribuicao(ctx.chamada_atribuicao());
             isPonteiro = false;
+        }else if(ctx.getStart().getText().equals("se")){
+            cmd += "if(" + visitExpressao(ctx.expressao()) +"){";
+            out.println(cmd);
+            
+            out.identationLevel++;
+            this.escopos.empilhar(ctx.escopoNome);
+            visitComandos(ctx.comandos());
+            this.escopos.desempilhar();
+            out.identationLevel--;
+            
+            cmd = "}";
         }
         
         out.println(cmd);
@@ -319,9 +330,77 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     @Override public T visitExpressao(LAParser.ExpressaoContext ctx) { 
         String expressao = "";
         
-        expressao = (String) visitExp_aritmetica(ctx.termo_logico().fator_logico().parcela_logica().exp_relacional().exp_aritmetica());
+        expressao += (String)visitTermo_logico(ctx.termo_logico());
+        for(int i=0; i<ctx.outros_termos_logicos().termo_logico().size(); i++){
+            expressao += "||" + (String)visitTermo_logico(ctx.outros_termos_logicos().termo_logico(i));
+        }
         
         return (T) expressao; 
+    }
+    
+    @Override public T visitTermo_logico(LAParser.Termo_logicoContext ctx) { 
+        String termo_logico = "";
+        
+        termo_logico += (String)visitFator_logico(ctx.fator_logico());
+        for(int i=0; i<ctx.outros_fatores_logicos().fator_logico().size(); i++){
+            termo_logico += "&&" + (String)visitFator_logico(ctx.outros_fatores_logicos().fator_logico(i));
+        }
+        
+        return (T)termo_logico; 
+    }
+    
+    @Override public T visitFator_logico(LAParser.Fator_logicoContext ctx) { 
+        String fator_logico = "";
+        
+        if(!regraVazia(ctx.op_nao())){
+            fator_logico += "!";
+        }
+        
+        fator_logico += visitParcela_logica(ctx.parcela_logica());
+        
+        return (T)fator_logico; 
+    }
+    
+    @Override public T visitParcela_logica(LAParser.Parcela_logicaContext ctx) { 
+        String parcela_logica = "";
+        
+        if(ctx.getStart().getText().equals("verdadeiro")){
+            parcela_logica += "1";
+        }else if(ctx.getStart().getText().equals("falso")){
+            parcela_logica += "0";
+        }else{
+            parcela_logica += (String)visitExp_relacional(ctx.exp_relacional());
+        }
+        
+        return (T)parcela_logica; 
+    }
+    
+    @Override public T visitExp_relacional(LAParser.Exp_relacionalContext ctx) { 
+        String exp_relacional = "";
+        
+        exp_relacional += (String)visitExp_aritmetica(ctx.exp_aritmetica());
+        exp_relacional += (String)visitOp_opcional(ctx.op_opcional());
+        
+        return (T)exp_relacional;
+    }
+    
+    @Override public T visitOp_opcional(LAParser.Op_opcionalContext ctx) { 
+        if(regraVazia(ctx)){
+            return (T)"";
+        }
+        String op_opcional = "";
+        
+        if(ctx.op_relacional().getText().equals("=")){
+            op_opcional += "==";
+        }else if(ctx.op_relacional().getText().equals("<>")){
+            op_opcional += "!=";
+        }else{
+            op_opcional += ctx.op_relacional().getText();
+        }
+        
+        op_opcional += (String)visitExp_aritmetica(ctx.exp_aritmetica());
+        
+        return (T)op_opcional; 
     }
     
     @Override public T visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) { 
