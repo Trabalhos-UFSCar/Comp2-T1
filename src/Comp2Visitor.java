@@ -257,13 +257,8 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             isPonteiro = false;
         }else if(ctx.getStart().getText().equals("se")){
             cmd += "if(" + visitExpressao(ctx.expressao()) +"){";
-            out.println(cmd);
             
-            out.identationLevel++;
-            this.escopos.empilhar(ctx.escopoNome);
-            visitComandos(ctx.comandos());
-            this.escopos.desempilhar();
-            out.identationLevel--;
+            entraComandosEscopo(cmd, ctx);
             
             cmd = "}";
             out.println(cmd);
@@ -293,19 +288,31 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             cmd += "for("+ctx.IDENT().getText()+" = "+(String)visitExp_aritmetica(ctx.exp_aritmetica(0))
              + "; "+ctx.IDENT().getText()+" <= "+(String)visitExp_aritmetica(ctx.exp_aritmetica(1))
              + "; "+ctx.IDENT().getText()+"++){";
-            out.println(cmd);
             
-            out.identationLevel++;
-            this.escopos.empilhar(ctx.escopoNome);
-            visitComandos(ctx.comandos());
-            this.escopos.desempilhar();
-            out.identationLevel--;
+            entraComandosEscopo(cmd, ctx);
+            
+            cmd = "}";
+        }else if(ctx.getStart().getText().equals("enquanto")){
+            cmd += "while ("+(String)visitExpressao(ctx.expressao())+"){";
+            
+            entraComandosEscopo(cmd, ctx);
+            
             cmd = "}";
         }
         
         out.println(cmd);
         
         return null; 
+    }
+    
+    public void entraComandosEscopo(String cmd, LAParser.CmdContext ctx){
+        out.println(cmd);
+            
+        out.identationLevel++;
+        this.escopos.empilhar(ctx.escopoNome);
+        visitComandos(ctx.comandos());
+        this.escopos.desempilhar();
+        out.identationLevel--;
     }
     
     @Override public T visitSelecao(LAParser.SelecaoContext ctx) {        
