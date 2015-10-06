@@ -58,10 +58,10 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         out.println("#include <stdio.h>");
         out.println("#include <stdlib.h>\n");
         
+        visitDeclaracoes(ctx.declaracoes());
+        
         out.println("int main(){");
         out.identationLevel++;
-        
-        visitDeclaracoes(ctx.declaracoes());
         
         visitCorpo(ctx.corpo());
         
@@ -80,8 +80,14 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { 
-//        out.print();
-        return null; 
+        if(regraVazia(ctx)){
+            return null;
+        }else{
+            visitDecl_local_global(ctx.decl_local_global());
+            visitDeclaracoes(ctx.declaracoes());
+        }
+        
+        return null;
     }
     /**
      * {@inheritDoc}
@@ -90,6 +96,13 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public T visitDecl_local_global(LAParser.Decl_local_globalContext ctx) { 
+        if(regraVazia(ctx)){
+            return null; 
+        }else if(!regraVazia(ctx.declaracao_local())){
+            visitDeclaracao_local(ctx.declaracao_local());
+        }else if(!regraVazia(ctx.declaracao_global())){
+            visitDeclaracao_global(ctx.declaracao_global());
+        }
         return null; 
     }
     /**
@@ -101,6 +114,13 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     @Override public T visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if(!regraVazia(ctx.variavel())){
             visitVariavel(ctx.variavel());
+        }else if(ctx.getStart().getText().equals("constante")){
+            // Trata declaracao constante como variavel normal.
+            tipoAtual = ctx.tipo_basico().getText();
+            String variavel = variavel(ctx.IDENT().getText(), null);
+            out.println(variavel);
+            out.println(ctx.IDENT().getText()+" = "+ctx.valor_constante().getText()+";");
+            tipoAtual = "";
         }
         return null;
     }

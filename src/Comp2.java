@@ -30,9 +30,9 @@ public class Comp2 {
             LAParser.ProgramaContext tree = parser.programa();
             
             if(saidaSintatico.toString().isEmpty()){
-                LAListener l = new Comp2Listener(saidaSemantico);
-                ParseTreeWalker ptw = new ParseTreeWalker();
-                ptw.walk(l, tree);
+//                LAListener l = new Comp2Listener(saidaSemantico);
+//                ParseTreeWalker ptw = new ParseTreeWalker();
+//                ptw.walk(l, tree);
             }
 
             if (saidaSemantico.toString().isEmpty()) {
