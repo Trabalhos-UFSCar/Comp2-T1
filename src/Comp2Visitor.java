@@ -125,8 +125,23 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         return null;
     }
     
+    @Override public T visitTipo(LAParser.TipoContext ctx) {
+        String tipo = "";
+        
+        if(!regraVazia(ctx.registro())){
+            visitRegistro(ctx.registro());
+        }else{
+            tipo += ctx.tipo_estendido().tipo_basico_ident().getText();
+        }
+        
+        return (T)tipo;
+    }
+    
     @Override public T visitVariavel(LAParser.VariavelContext ctx) {
-        tipoAtual = ctx.tipo().getText();
+        if(ctx.tipo().getStart().getText().equals("^")){
+            isPonteiro = true;
+        }
+        tipoAtual = (String)visitTipo(ctx.tipo());
         
         String variavel = "";
         variavel = variavel(ctx.nome.getText(), ctx.dimensao());
@@ -136,6 +151,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         }
         
         tipoAtual = "";
+        isPonteiro = false;
         
         out.println(variavel);
         
@@ -144,11 +160,16 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     
     public String variavel(String nome, LAParser.DimensaoContext dimCtx){
         escopos.adicionarSimbolo(nome, tipoAtual);
+        String ponteiro_opcional = "";
+        if(isPonteiro){
+            ponteiro_opcional = "*";
+        }
         
         String variavel = "";
         if(tipoAtual.equals("literal")){
             variavel =
              tipo.get(tipoAtual) +
+             ponteiro_opcional +
              " " +
              nome +
              "[80]" +
@@ -157,6 +178,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         }else{
             variavel = 
              tipo.get(tipoAtual) +
+             ponteiro_opcional +
              " " +
              nome + 
              visitDimensao(dimCtx) +
