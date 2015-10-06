@@ -289,6 +289,18 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             this.escopos.desempilhar();
             out.identationLevel--;
             cmd = "}";
+        }else if(ctx.getStart().getText().equals("para")){
+            cmd += "for("+ctx.IDENT().getText()+" = "+(String)visitExp_aritmetica(ctx.exp_aritmetica(0))
+             + "; "+ctx.IDENT().getText()+" <= "+(String)visitExp_aritmetica(ctx.exp_aritmetica(1))
+             + "; "+ctx.IDENT().getText()+"++){";
+            out.println(cmd);
+            
+            out.identationLevel++;
+            this.escopos.empilhar(ctx.escopoNome);
+            visitComandos(ctx.comandos());
+            this.escopos.desempilhar();
+            out.identationLevel--;
+            cmd = "}";
         }
         
         out.println(cmd);
