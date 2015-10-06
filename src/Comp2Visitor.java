@@ -298,6 +298,12 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             entraComandosEscopo(cmd, ctx);
             
             cmd = "}";
+        }else if(ctx.getStart().getText().equals("faca")){
+            cmd += "do{";
+            
+            entraComandosEscopo(cmd, ctx);
+            
+            cmd = "}while ("+visitExpressao(ctx.expressao())+");";
         }
         
         out.println(cmd);
@@ -581,6 +587,8 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             parcela_unario += ctx.NUM_INT().getText();
         }else if(!regraVazia(ctx.NUM_REAL())){
             parcela_unario += ctx.NUM_REAL().getText();
+        }else if(!regraVazia(ctx.expressao())){
+            parcela_unario += "("+ (String)visitExpressao(ctx.expressao())+ ")";
         }
         
         return (T) parcela_unario; 
