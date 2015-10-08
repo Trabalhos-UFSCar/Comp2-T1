@@ -87,9 +87,10 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     @Override public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { 
         if(regraVazia(ctx)){
             return null;
-        }else{
-            visitDecl_local_global(ctx.decl_local_global());
-            visitDeclaracoes(ctx.declaracoes());
+        }
+        
+        for(LAParser.Decl_local_globalContext dlg : ctx.decl_local_global()){
+            visitDecl_local_global(dlg);
         }
         
         return null;
@@ -253,8 +254,55 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
-//        out.println("global");
+        if(ctx.getStart().getText().equals("procedimento")){
+            out.println("void " + ctx.IDENT().getText()+"("+visitParametros_opcional(ctx.parametros_opcional())+"){");
+            out.identationLevel++;
+            escopos.empilhar(ctx.IDENT().getText());
+            visitDeclaracoes_locais(ctx.declaracoes_locais());
+            visitComandos(ctx.comandos());
+            escopos.desempilhar();
+            out.identationLevel--;
+            out.println("}");
+        }else{
+            System.out.println("Funcao precisa ser implementada");
+        }
+        
         return null; 
+    }
+    
+    @Override public T visitParametros_opcional(LAParser.Parametros_opcionalContext ctx) { 
+        if(regraVazia(ctx.parametro())){
+            return (T)"";
+        }
+        String parametros_opcional = "";
+        
+        escopos.adicionarSimbolo((String)visitIdentificador(ctx.parametro().identificador()), 
+         ctx.parametro().tipo_estendido().getText());
+        
+        String tipoParam = "";
+        if(ctx.parametro().tipo_estendido().getText().equals("literal")){
+            tipoParam = "char* ";
+        }else{
+            tipoParam = tipo.get(ctx.parametro().tipo_estendido().getText());
+        }
+        
+        parametros_opcional += tipoParam;
+        
+        if(!regraVazia(ctx.parametro().var_opcional())){
+            parametros_opcional += (String)visitVar_opcional(ctx.parametro().var_opcional());
+        }
+        
+        parametros_opcional += (String)visitIdentificador(ctx.parametro().identificador());
+        
+        if(!regraVazia(ctx.parametro().mais_ident())){
+            parametros_opcional += (String)visitMais_ident(ctx.parametro().mais_ident());
+        }
+        
+        if(!regraVazia(ctx.parametro().mais_parametros())){
+            parametros_opcional += ", " + visitParametro(ctx.parametro().mais_parametros().parametro());
+        }
+        
+        return (T)parametros_opcional; 
     }
     
     @Override public T visitCorpo(LAParser.CorpoContext ctx) {

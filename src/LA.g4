@@ -24,9 +24,9 @@ programa  :
     'fim_algoritmo'
 ;
 
-declaracoes  :  
-    decl_local_global  declaracoes   |   
-    ;
+declaracoes : 
+    (decl_local_global)*
+;
 
 decl_local_global  :  declaracao_local | declaracao_global ;
 
