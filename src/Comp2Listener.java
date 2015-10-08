@@ -24,6 +24,7 @@ public class Comp2Listener extends LABaseListener {
         tipo.put("literal", "char");    // TODO: verificar como fazer literal em C
         tipo.put("real", "float");
         tipo.put("logico", "int");  // contorno para bool em C
+        tipo.put("registro", "type def");
     }
 
     @Override
@@ -70,9 +71,16 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.nome.getText();
-        tipoAtual = ctx.tipo().getText().replace("^", "");
+        EntradaTabelaDeSimbolos aux =  new EntradaTabelaDeSimbolos(nome, tipoAtual);
         if (!escopos.existeSimbolo(nome)) {
-            escopos.adicionarSimbolo(nome, tipoAtual);
+            if (ctx.tipo().isRegistro) {
+                tipoAtual = "registro";
+            } else {
+                tipoAtual = ctx.tipo().getText().replace("^", "");
+            }
+
+            escopos.adicionarSimbolo(aux);
+            
         } else {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
         }
@@ -85,6 +93,11 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void exitVariavel(LAParser.VariavelContext ctx) {
         tipoAtual = "";
+    }
+
+    @Override
+    public void enterRegistro(LAParser.RegistroContext ctx) {
+        out.println(ctx.variavel().nome.getText());
     }
 
     @Override

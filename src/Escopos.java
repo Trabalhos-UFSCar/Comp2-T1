@@ -38,6 +38,10 @@ public class Escopos {
         return null;
     }
 
+    public void adicionarSimbolo(EntradaTabelaDeSimbolos simbolo){
+        topo().adicionarSimbolo(simbolo);
+    }
+    
     public void adicionarSimbolo(String nome, String tipo) {
         topo().adicionarSimbolo(nome, tipo);
     }

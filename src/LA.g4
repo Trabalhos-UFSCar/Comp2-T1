@@ -66,9 +66,10 @@ dimensao :
     | 
 ;
 
-tipo :  
+tipo returns[Boolean isRegistro]   
+    @init{$isRegistro=true;} :
     registro 
-    | tipo_estendido 
+    | tipo_estendido {$isRegistro=false;} 
 ;
 
 mais_ident  :  
