@@ -151,7 +151,8 @@ public class VerificadorDeTipos {
             tipoExp = "real";
         }else if (ctx.NUM_INT() != null) {
             tipoExp = "inteiro";
-        }else if(ctx.chamada_partes() != null && !(ctx.chamada_partes().getText().equals(""))){
+        }else if(ctx.chamada_partes() != null && !(ctx.chamada_partes().
+         getText().equals("")) && !(ctx.chamada_partes().getStart().getText().equals("("))){
             tipoExp = verificaTipo(ctx.chamada_partes().outros_ident());
         }else if(ctx.outros_ident() != null){
             tipoExp = verificaTipo(ctx.outros_ident());

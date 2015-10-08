@@ -255,16 +255,27 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
      */
     @Override public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
         if(ctx.getStart().getText().equals("procedimento")){
+            escopos.empilhar(ctx.IDENT().getText());
             out.println("void " + ctx.IDENT().getText()+"("+visitParametros_opcional(ctx.parametros_opcional())+"){");
             out.identationLevel++;
-            escopos.empilhar(ctx.IDENT().getText());
             visitDeclaracoes_locais(ctx.declaracoes_locais());
             visitComandos(ctx.comandos());
             escopos.desempilhar();
             out.identationLevel--;
             out.println("}");
-        }else{
-            System.out.println("Funcao precisa ser implementada");
+        }else{ //Função
+            String tipoRetorno = tipo.get(ctx.tipo_estendido().getText());
+            escopos.adicionarSimbolo(ctx.IDENT().getText(), ctx.tipo_estendido().getText());
+            escopos.empilhar(ctx.IDENT().getText());
+            out.println(tipoRetorno + " "
+             + ctx.IDENT().getText() + "(" + visitParametros_opcional(ctx.parametros_opcional())
+             + "){");
+            out.identationLevel++;
+            visitDeclaracoes_locais(ctx.declaracoes_locais());
+            visitComandos(ctx.comandos());
+            escopos.desempilhar();
+            out.identationLevel--;
+            out.println("}");
         }
         
         return null; 
@@ -283,7 +294,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         if(ctx.parametro().tipo_estendido().getText().equals("literal")){
             tipoParam = "char* ";
         }else{
-            tipoParam = tipo.get(ctx.parametro().tipo_estendido().getText());
+            tipoParam = tipo.get(ctx.parametro().tipo_estendido().getText()) + " ";
         }
         
         parametros_opcional += tipoParam;
@@ -417,6 +428,8 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             entraComandosEscopo(cmd, ctx);
             
             cmd = "}while ("+visitExpressao(ctx.expressao())+");";
+        }else if(ctx.getStart().getText().equals("retorne")){
+            cmd += "return " + visitExpressao(ctx.expressao()) + ";";
         }
         
         out.println(cmd);
@@ -731,7 +744,11 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         String chamada_partes = "";
         
         if(!regraVazia(ctx.expressao())){
-            chamada_partes += "(" + visitExpressao(ctx.expressao()) + visitMais_expressao(ctx.mais_expressao()) + ")";
+            chamada_partes += "(" + visitExpressao(ctx.expressao());
+            if(!regraVazia(ctx.mais_expressao())){
+                chamada_partes += visitMais_expressao(ctx.mais_expressao());
+            }
+            chamada_partes += ")";
         }else if(!regraVazia(ctx.outros_ident())){
             chamada_partes += (String)visitOutros_ident(ctx.outros_ident()) + (String)visitDimensao(ctx.dimensao());
         }
