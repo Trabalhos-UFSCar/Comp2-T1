@@ -103,7 +103,7 @@ public class VerificadorDeTipos {
     public String verificaTipo(LAParser.TermoContext ctx) {
         String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.fator());
-        if (ctx.outros_fatores() == null || ctx.outros_fatores().getText().isEmpty()) {
+        if (ctx.outros_fatores() == null && ctx.outros_fatores().getText().isEmpty()) {
             return tipoExp;
         } else {
             for (LAParser.FatorContext termo : ctx.outros_fatores().fator()) {
@@ -145,14 +145,18 @@ public class VerificadorDeTipos {
     public String verificaTipo(LAParser.Parcela_unarioContext ctx) {
         String tipoExp = null;
 
-        if (ctx.IDENT() != null) {
-            tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
-        } else if (ctx.NUM_INT() != null) {
-            tipoExp = "inteiro";
-        } else if (ctx.NUM_REAL() != null) {
-            tipoExp = "real";
-        } else if (ctx.expressao() != null) {
+        if(ctx.expressao() != null){
             tipoExp = verificaTipo(ctx.expressao());
+        }else if (ctx.NUM_REAL() != null) {
+            tipoExp = "real";
+        }else if (ctx.NUM_INT() != null) {
+            tipoExp = "inteiro";
+        }else if(ctx.chamada_partes() != null && !(ctx.chamada_partes().getText().equals(""))){
+            tipoExp = verificaTipo(ctx.chamada_partes().outros_ident());
+        }else if(ctx.outros_ident() != null){
+            tipoExp = verificaTipo(ctx.outros_ident());
+        }else{
+            tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
         }
 
         return tipoExp;
