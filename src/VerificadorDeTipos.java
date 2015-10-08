@@ -152,7 +152,8 @@ public class VerificadorDeTipos {
         }else if (ctx.NUM_INT() != null) {
             tipoExp = "inteiro";
         }else if(ctx.chamada_partes() != null && !(ctx.chamada_partes().
-         getText().equals("")) && !(ctx.chamada_partes().getStart().getText().equals("("))){
+         getText().equals("")) && ctx.chamada_partes().outros_ident() != null
+         && !ctx.chamada_partes().outros_ident().getStart().getText().equals("[")){
             tipoExp = verificaTipo(ctx.chamada_partes().outros_ident());
         }else if(ctx.outros_ident() != null){
             tipoExp = verificaTipo(ctx.outros_ident());
@@ -196,7 +197,6 @@ public class VerificadorDeTipos {
 
     public String verificaTipo(LAParser.IdentificadorContext ctx) {
         String text = ctx.getText();
-//        System.out.println("outros_id: "+ctx.outros_ident().getText());
         String tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
         if (ctx.outros_ident() == null || ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
             return tipoExp;

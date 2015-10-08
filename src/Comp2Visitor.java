@@ -749,7 +749,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
                 chamada_partes += visitMais_expressao(ctx.mais_expressao());
             }
             chamada_partes += ")";
-        }else if(!regraVazia(ctx.outros_ident())){
+        }else if(!regraVazia(ctx.outros_ident()) || !regraVazia(ctx.dimensao())){
             chamada_partes += (String)visitOutros_ident(ctx.outros_ident()) + (String)visitDimensao(ctx.dimensao());
         }
         
