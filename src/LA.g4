@@ -106,9 +106,10 @@ registro  :
     'registro' variavel mais_variaveis 'fim_registro' 
 ;
 
-declaracao_global  :  
+declaracao_global returns [String tipoFuncao] 
+    @init{$tipoFuncao="procedimento";} :
     'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' 
-    | 'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' 
+    | {$tipoFuncao="funcao";} 'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' 
 ;
 
 parametros_opcional  :  

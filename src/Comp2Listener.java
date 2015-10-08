@@ -71,16 +71,15 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.nome.getText();
-        EntradaTabelaDeSimbolos aux =  new EntradaTabelaDeSimbolos(nome, tipoAtual);
         if (!escopos.existeSimbolo(nome)) {
             if (ctx.tipo().isRegistro) {
                 tipoAtual = "registro";
             } else {
                 tipoAtual = ctx.tipo().getText().replace("^", "");
             }
-
+            EntradaTabelaDeSimbolos aux = new EntradaTabelaDeSimbolos(nome, tipoAtual);
             escopos.adicionarSimbolo(aux);
-            
+
         } else {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
         }
@@ -97,8 +96,19 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterRegistro(LAParser.RegistroContext ctx) {
-        out.println(ctx.variavel().nome.getText());
+
     }
+
+    @Override
+    public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        escopos.adicionarSimbolo(ctx.IDENT().toString(), ctx.tipoFuncao);
+        
+        if(ctx.parametros_opcional()!=null){
+            
+        }
+    }
+    
+    @Override public void enterParametro(LAParser.ParametroContext ctx) { }
 
     @Override
     public void enterMais_var(LAParser.Mais_varContext ctx) {
