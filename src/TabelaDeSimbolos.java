@@ -5,14 +5,26 @@ import java.util.List;
 public class TabelaDeSimbolos {
     private String escopo;
     private List<EntradaTabelaDeSimbolos> simbolos;
+    private List<EntradaTabelaDeSimbolos> valoresRegistro;
+    private List<EntradaTabelaDeSimbolos> parametrosFuncao;
     
     public TabelaDeSimbolos(String escopo) {
         simbolos = new ArrayList<EntradaTabelaDeSimbolos>();
+        valoresRegistro = new ArrayList<EntradaTabelaDeSimbolos>();
+        parametrosFuncao = new ArrayList<EntradaTabelaDeSimbolos>();
         this.escopo = escopo;
     }
     
     public void adicionarSimbolo(String nome, String tipo) {
         simbolos.add(new EntradaTabelaDeSimbolos(nome,tipo));
+    }
+    
+    public void adicionarParametro(String nome, String tipo) {
+        parametrosFuncao.add(new EntradaTabelaDeSimbolos(nome,tipo));
+    }
+    
+    public void adicionarValorRegistro(String nome, String tipo) {
+        valoresRegistro.add(new EntradaTabelaDeSimbolos(nome,tipo));
     }
     
     public void adicionarSimbolo(String nome, String tipo, Integer dimensao) {
