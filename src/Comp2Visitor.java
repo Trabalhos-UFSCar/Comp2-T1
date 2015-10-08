@@ -126,6 +126,12 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             out.println(variavel);
             out.println(ctx.IDENT().getText()+" = "+ctx.valor_constante().getText()+";");
             tipoAtual = "";
+        }else if(ctx.getStart().getText().equals("tipo")){
+            String ident = ctx.IDENT().getText();
+            tipo.put(ident, ident);
+            out.println("typedef ");
+            visitTipo(ctx.tipo());
+            out.println(ident+";");
         }
         return null;
     }
