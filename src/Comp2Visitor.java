@@ -19,7 +19,11 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     Escopos escopos;
     Map<String, String> tipo;
     VerificadorDeTipos vdt;
+    
+    // Estratégia não muito correta, o ideal é na tabela de símbolos ter um 
+    //boolean indicando se é ponteiro ou não.
     boolean isPonteiro = false;
+    
     //Essa variavel é usada para contornar a dificuldade que é decidir o tipo de uma variavel
     //enquanto na regra mais_var. 
     String tipoAtual = "";
@@ -35,6 +39,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         tipo.put("literal", "char");    // TODO: verificar como fazer literal em C
         tipo.put("real", "float");
         tipo.put("logico", "int");  // contorno para bool em C
+        tipo.put("registro", ""); // Nao eh usado realmente, soh usado na tabela de simbolo.
     }
     
     public boolean regraVazia(ParserRuleContext ctx){
@@ -130,11 +135,32 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         
         if(!regraVazia(ctx.registro())){
             visitRegistro(ctx.registro());
+            return (T)"registro";
         }else{
             tipo += ctx.tipo_estendido().tipo_basico_ident().getText();
         }
         
         return (T)tipo;
+    }
+    
+    @Override public T visitRegistro(LAParser.RegistroContext ctx) { 
+        String registro = "";
+        
+        registro += "struct{";
+        out.println(registro);
+        out.identationLevel++;
+        if(!regraVazia(ctx.variavel())){
+            visitVariavel(ctx.variavel());
+        }
+        if(!regraVazia(ctx.mais_variaveis())){
+            visitMais_variaveis(ctx.mais_variaveis());
+        }
+        out.identationLevel--;
+        registro = "}";
+        
+        out.println(registro);
+        
+        return null; 
     }
     
     @Override public T visitVariavel(LAParser.VariavelContext ctx) {
@@ -187,6 +213,17 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         }
         
         return variavel;
+    }
+    
+    @Override public T visitMais_variaveis(LAParser.Mais_variaveisContext ctx) { 
+        if(!regraVazia(ctx.variavel())){
+            visitVariavel(ctx.variavel());
+        }
+        if(!regraVazia(ctx.mais_variaveis())){
+            visitMais_variaveis(ctx.mais_variaveis());
+        }
+        
+        return null ; 
     }
     
     @Override public T visitDimensao(LAParser.DimensaoContext ctx) {
@@ -275,7 +312,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
                 cmd += "*";
                 isPonteiro = true;
             }
-            cmd += ctx.IDENT().getText() + (String)visitChamada_atribuicao(ctx.chamada_atribuicao());
+            cmd += (String)visitChamada_atribuicao(ctx.chamada_atribuicao());
             isPonteiro = false;
         }else if(ctx.getStart().getText().equals("se")){
             cmd += "if(" + visitExpressao(ctx.expressao()) +"){";
@@ -396,19 +433,26 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     
     @Override public T visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) { 
         String chamada_atribuicao = "";
+        String parentIdent = ((LAParser.CmdContext)ctx.getParent()).IDENT().getText();
         
         if(!regraVazia(ctx.argumentos_opcional())){ // É função
-            chamada_atribuicao += "(" + visitExpressao(ctx.argumentos_opcional().expressao());
+            chamada_atribuicao += parentIdent + "(" + visitExpressao(ctx.argumentos_opcional().expressao());
             for(LAParser.ExpressaoContext eCtx : ctx.argumentos_opcional().mais_expressao().expressao()){
                 chamada_atribuicao += ", " + visitExpressao(eCtx);
             }
             chamada_atribuicao += ");";
         }else{ //Não é função
-            chamada_atribuicao += (String)visitOutros_ident(ctx.outros_ident()) + 
-             (String)visitDimensao(ctx.dimensao()) +
-             "=" +
-             (String)visitExpressao(ctx.expressao()) +
-             ";";
+            if(vdt.verificaTipo(ctx.expressao()).equals("literal")){
+                chamada_atribuicao += "strcpy(" + parentIdent + visitOutros_ident(ctx.outros_ident())
+                 + ", " + visitExpressao(ctx.expressao()) + ");";
+            }
+            else{
+                chamada_atribuicao += parentIdent + (String)visitOutros_ident(ctx.outros_ident()) + 
+                 (String)visitDimensao(ctx.dimensao()) +
+                 "=" +
+                 (String)visitExpressao(ctx.expressao()) +
+                 ";";
+            }
         }
         
         return (T)chamada_atribuicao; 
@@ -603,8 +647,18 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     @Override public T visitParcela_unario(LAParser.Parcela_unarioContext ctx) { 
         String parcela_unario = "";
         
-        if(!regraVazia(ctx.IDENT())){
-            parcela_unario += ctx.IDENT().getText();
+//        if(!regraVazia(ctx.chamada_partes())){
+//            parcela_unario += ctx.IDENT().getText() + (String)visitChamada_partes(ctx.chamada_partes());
+//            return (T)parcela_unario;
+//        }
+        
+        if(ctx.getStart().getText().equals("^")){
+            isPonteiro = true;
+            parcela_unario += "*" + ctx.IDENT().getText()
+             + visitOutros_ident(ctx.outros_ident()) + visitDimensao(ctx.dimensao());
+            isPonteiro = false;
+        }else if(!regraVazia(ctx.IDENT())){
+            parcela_unario += ctx.IDENT().getText() + (String)visitChamada_partes(ctx.chamada_partes());
         }else if(!regraVazia(ctx.NUM_INT())){
             parcela_unario += ctx.NUM_INT().getText();
         }else if(!regraVazia(ctx.NUM_REAL())){
@@ -614,6 +668,21 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         }
         
         return (T) parcela_unario; 
+    }
+    
+    @Override public T visitChamada_partes(LAParser.Chamada_partesContext ctx) { 
+        if(regraVazia(ctx)){
+            return (T)"";
+        }
+        String chamada_partes = "";
+        
+        if(!regraVazia(ctx.expressao())){
+            chamada_partes += "(" + visitExpressao(ctx.expressao()) + visitMais_expressao(ctx.mais_expressao()) + ")";
+        }else if(!regraVazia(ctx.outros_ident())){
+            chamada_partes += (String)visitOutros_ident(ctx.outros_ident()) + (String)visitDimensao(ctx.dimensao());
+        }
+        
+        return (T)chamada_partes; 
     }
     
     @Override public T visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) { 

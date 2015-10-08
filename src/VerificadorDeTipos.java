@@ -144,7 +144,7 @@ public class VerificadorDeTipos {
 
     public String verificaTipo(LAParser.Parcela_unarioContext ctx) {
         String tipoExp = null;
-
+        
         if(ctx.expressao() != null){
             tipoExp = verificaTipo(ctx.expressao());
         }else if (ctx.NUM_REAL() != null) {
@@ -195,8 +195,9 @@ public class VerificadorDeTipos {
 
     public String verificaTipo(LAParser.IdentificadorContext ctx) {
         String text = ctx.getText();
+//        System.out.println("outros_id: "+ctx.outros_ident().getText());
         String tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
-        if (ctx.outros_ident() == null && ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
+        if (ctx.outros_ident() == null || ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
             return tipoExp;
         } else {
 
