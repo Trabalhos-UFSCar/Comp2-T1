@@ -197,11 +197,14 @@ public class VerificadorDeTipos {
 
     public String verificaTipo(LAParser.IdentificadorContext ctx) {
         String text = ctx.getText();
-        String tipoExp = escopos.buscaSimbolo(ctx.IDENT().getText()).getTipo();
+        String tipoExp = escopos.buscaSimbolo(text).getTipo();
         if (ctx.outros_ident() == null || ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
+            if(tipoExp.equals("registro")){
+                tipoExp=escopos.buscaSimbolo(text).buscaTipoRegistro(text);
+            }
+            
             return tipoExp;
         } else {
-
             String tipoOutroTermo = verificaTipo(ctx.outros_ident().identificador());
             tipoExp = regraTipos(tipoExp, tipoOutroTermo);
 

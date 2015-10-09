@@ -24,6 +24,16 @@ public class EntradaTabelaDeSimbolos {
         this.dimensao = dimensao;
     }
     
+    public String buscaTipoRegistro(String nome){
+        for(EntradaTabelaDeSimbolos entrada:valoresRegistro){
+            if(entrada.nome.equals(nome)){
+                return entrada.tipo;
+            }
+        }
+        
+        return "";
+    }
+    
     public String getNome() {
         return nome;
     }
