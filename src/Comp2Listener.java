@@ -1,5 +1,7 @@
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Comp2Listener extends LABaseListener {
@@ -12,12 +14,17 @@ public class Comp2Listener extends LABaseListener {
     //Essa variavel é usada para contornar a dificuldade que é decidir o tipo de uma variavel
     //enquanto na regra mais_var. 
     String tipoAtual = "";
+    
+    //Lista temporaria usada para guardar as variaveis que serão pertencentes a
+    //um registro
+    List<EntradaTabelaDeSimbolos> simbolosRegistro;
 
     public Comp2Listener(SaidaParser out) {
         this.out = out;
         this.escopos = new Escopos();
         this.tipo = new HashMap<>();
         this.vdt = new VerificadorDeTipos(escopos);
+        this.simbolosRegistro = new ArrayList<>();
 
         // add os tipos em LA (key) e C (value)
         tipo.put("inteiro", "int");
@@ -63,7 +70,7 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterIdentificador(LAParser.IdentificadorContext ctx) {
-        if (!escopos.existeSimbolo(ctx.IDENT().getText())) {
+        if (!escopos.existeSimbolo(ctx.IDENT().getText()) && !escopos.existeRegistro(ctx.IDENT().getText())) {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT() + " nao declarado");
         }
     }
@@ -71,14 +78,35 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
         String nome = ctx.nome.getText();
+        
+        //Checagem para ter certeza de que essa variavel não foi definida anteriormente
         if (!escopos.existeSimbolo(nome)) {
-            if (ctx.tipo().isRegistro) {
+            //checagem para ver se essa variavel eh um registro
+            if (ctx.tipo().registro()!=null) {
                 tipoAtual = "registro";
             } else {
                 tipoAtual = ctx.tipo().getText().replace("^", "");
+            }            
+            
+            //checagem para ver se essa é uma variavel inserida dentro de um registro
+            //se for, ao invés de criar uma nova entrada dentro do escopo, essa variavel
+            //será armazenada temporariamente para ser inserida futuramente dentro da entrada
+            //que foi definida como um registro
+            if(ctx.isRegistro){
+                System.out.println("Registro...: "+nome);
+                simbolosRegistro.add(new EntradaTabelaDeSimbolos(nome, tipoAtual));
+            } else {
+                escopos.adicionarSimbolo(nome, tipoAtual);
+                //se esta variavel for um registro, serão inseridos os valores 
+                //internos que foram guardados na lista simbolosRegistro 
+                if(tipoAtual.equals("registro")){
+                    for(EntradaTabelaDeSimbolos entrada: simbolosRegistro){
+                        System.out.println("Inseriu em: "+nome+" o registro: "+entrada.getNome());
+                        escopos.adicionarValorRegistro(entrada.getNome(), entrada.getTipo());
+                    }
+                    simbolosRegistro = new ArrayList<>();                    
+                }
             }
-            EntradaTabelaDeSimbolos aux = new EntradaTabelaDeSimbolos(nome, tipoAtual);
-            escopos.adicionarSimbolo(aux);
 
         } else {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
@@ -96,16 +124,12 @@ public class Comp2Listener extends LABaseListener {
 
     @Override
     public void enterRegistro(LAParser.RegistroContext ctx) {
-
+        
     }
 
     @Override
     public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         escopos.adicionarSimbolo(ctx.IDENT().toString(), ctx.tipoFuncao);
-
-        if (ctx.parametros_opcional() != null) {
-
-        }
     }
 
     @Override
@@ -125,7 +149,12 @@ public class Comp2Listener extends LABaseListener {
             nome = ctx.nome.getText();
 
             if (!escopos.existeSimbolo(nome)) {
-                escopos.adicionarSimbolo(nome, tipoAtual);
+                if(ctx.isRegistro){
+                    simbolosRegistro.add(new EntradaTabelaDeSimbolos(nome,tipoAtual));
+                } else {                    
+                    escopos.adicionarSimbolo(nome, tipoAtual);
+                }
+                
             } else {
                 out.println("Linha " + ctx.nome.getLine() + ": identificador " + nome + " ja declarado anteriormente");
             }

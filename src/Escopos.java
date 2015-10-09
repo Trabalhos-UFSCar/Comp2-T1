@@ -27,10 +27,19 @@ public class Escopos {
         return false;
     }
     
-    public EntradaTabelaDeSimbolos buscaSimbolo(String nome) {
+    public boolean existeRegistro(String nome) {
         for (TabelaDeSimbolos ts : pilha) {
             for(EntradaTabelaDeSimbolos entrada:ts.todosSimbolos()){
-                if(entrada.getNome().equals(nome)){
+                return !entrada.buscaTipoRegistro(nome).equals("");
+            }
+        }
+        return false;
+    }
+
+    public EntradaTabelaDeSimbolos buscaSimbolo(String nome) {
+        for (TabelaDeSimbolos ts : pilha) {
+            for (EntradaTabelaDeSimbolos entrada : ts.todosSimbolos()) {
+                if (entrada.getNome().equals(nome)) {
                     return entrada;
                 }
             }
@@ -38,10 +47,10 @@ public class Escopos {
         return null;
     }
 
-    public void adicionarSimbolo(EntradaTabelaDeSimbolos simbolo){
+    public void adicionarSimbolo(EntradaTabelaDeSimbolos simbolo) {
         topo().adicionarSimbolo(simbolo);
     }
-    
+
     public void adicionarSimbolo(String nome, String tipo) {
         topo().adicionarSimbolo(nome, tipo);
     }
@@ -57,12 +66,23 @@ public class Escopos {
     public List getTodasTabelas() {
         return pilha;
     }
-    
+
     public void adicionarParametro(String nome, String tipo) {
-       topo().adicionarParametro(nome, tipo);
+        topo().adicionarParametro(nome, tipo);
     }
-    
+
     public void adicionarValorRegistro(String nome, String tipo) {
         topo().adicionarValorRegistro(nome, tipo);
+    }
+
+    public String buscaTipoRegistro(String nome) {
+        for (TabelaDeSimbolos tabela : pilha) {
+            for (EntradaTabelaDeSimbolos entrada : tabela.todosSimbolos()) {
+                    return entrada.buscaTipoRegistro(nome);
+                
+            }
+        }
+
+        return "";
     }
 }

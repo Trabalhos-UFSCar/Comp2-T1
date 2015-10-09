@@ -37,13 +37,16 @@ declaracao_local :
 ;
 
 
-variavel :  
-    nome=IDENT dimensao mais_var 
+variavel returns [Boolean isRegistro]   
+    @init{$isRegistro=false;} :  
+    nome=IDENT dimensao mais_var
+    {$mais_var.isRegistro=$isRegistro;}
     ':' 
     tp=tipo 
 ;
 
-mais_var :  
+mais_var returns [Boolean isRegistro]  
+@init{$isRegistro=false;} : 
     (',' nome=IDENT dimensao)*
 ;
 
@@ -66,10 +69,8 @@ dimensao :
     | 
 ;
 
-tipo returns[Boolean isRegistro]   
-    @init{$isRegistro=true;} :
-    registro 
-    | tipo_estendido {$isRegistro=false;} 
+tipo : 
+    registro | tipo_estendido 
 ;
 
 mais_ident  returns [List<String> nomes]
@@ -83,8 +84,12 @@ mais_ident  returns [List<String> nomes]
     | 
 ;
 
-mais_variaveis  :  
-    variavel mais_variaveis 
+mais_variaveis  returns [Boolean isRegistro]   
+    @init{$isRegistro=false;} :  
+    variavel 
+    {$variavel.isRegistro=$isRegistro;}
+    mais_variaveis
+    {$mais_variaveis.isRegistro=$isRegistro;} 
     | 
 ;
 
@@ -109,7 +114,12 @@ valor_constante  :
 ;
 
 registro  :  
-    'registro' variavel mais_variaveis 'fim_registro' 
+    'registro'
+    variavel 
+    {$variavel.isRegistro=true;}
+    mais_variaveis 
+    {$mais_variaveis.isRegistro=true;}
+    'fim_registro' 
 ;
 
 declaracao_global returns [String tipoFuncao] 

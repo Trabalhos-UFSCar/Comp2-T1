@@ -188,21 +188,32 @@ public class VerificadorDeTipos {
 
     }
 
+//    public String verificaTipo(LAParser.Outros_identContext ctx) {
+//        String text = ctx.getText();
+//        String tipoExp = verificaTipo(ctx.identificador());
+//
+//        return tipoExp;
+//    }
+    
     public String verificaTipo(LAParser.Outros_identContext ctx) {
         String text = ctx.getText();
-        String tipoExp = verificaTipo(ctx.identificador());
-
-        return tipoExp;
+        return escopos.buscaTipoRegistro(text);
     }
 
     public String verificaTipo(LAParser.IdentificadorContext ctx) {
         String text = ctx.getText();
-        String tipoExp = escopos.buscaSimbolo(text).getTipo();
+        EntradaTabelaDeSimbolos entrada = escopos.buscaSimbolo(text);
+        String tipoExp;
+        System.out.println("Processando: "+text);
+        //se não foi encontrada nos escopos, quer dizer que este é um identificador
+        //de um registro
+        if(entrada!=null){
+            tipoExp=entrada.getTipo();
+        } else {
+            tipoExp=verificaTipo(ctx.outros_ident());
+        }
+        
         if (ctx.outros_ident() == null || ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
-            if(tipoExp.equals("registro")){
-                tipoExp=escopos.buscaSimbolo(text).buscaTipoRegistro(text);
-            }
-            
             return tipoExp;
         } else {
             String tipoOutroTermo = verificaTipo(ctx.outros_ident().identificador());
