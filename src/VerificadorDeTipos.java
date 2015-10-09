@@ -1,14 +1,37 @@
-
+/**
+ * Esta classe é responsável pela verificação do tipo de uma expressão ou outros
+ * elementos derivados de uma expressão (tais como um identificador).
+ * 
+ * Ela percorre recursivamente toda a árvore da expressão até as folhas
+ * e retorna fazendo uma análise dos nós filhos/irmãos e passando para os nós pais.
+ * 
+ * A comparação entre tipos é feito por meior da função regraTipos(s1,s2).
+ * Outras comparações semânticas são adicionadas durante o algoritmo.
+ */
 public class VerificadorDeTipos {
-
+    
+    //Contém todas as variáveis de todos os escopos criados durante o semântico
     Escopos escopos;
-
+    
+    /**
+     * Inicializa a classe como a informação do escopos que precisam verificação de tipo
+     * @param escopos escopos que contém informação das variáveis
+     */
     public VerificadorDeTipos(Escopos escopos) {
         this.escopos = escopos;
     }
+    
+    /**
+     * O método encontra o tipo do primeiro termo lógico
+     * da expressão. Se outros termos lógicos estão presentes,
+     * compara tipo entre termos lógicos consecutivos 2 a 2 por
+     * meio de regraTipos().
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.ExpressaoContext ctx) {
-        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.termo_logico());
         if (ctx.outros_termos_logicos() == null || ctx.outros_termos_logicos().getText().isEmpty()) {
             return tipoExp;
@@ -20,9 +43,18 @@ public class VerificadorDeTipos {
         }
         return tipoExp;
     }
+    
+    /**
+     * O método encontra o tipo do primeiro fator lógico
+     * do termo lógico. Se outros fatores lógicos estão presentes,
+     * compara tipo entre fatores lógicos consecutivos 2 a 2 por
+     * meio de regraTipos().
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Termo_logicoContext ctx) {
-        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.fator_logico());
         if (ctx.outros_fatores_logicos() == null || ctx.outros_fatores_logicos().getText().isEmpty()) {
             return tipoExp;
@@ -34,9 +66,19 @@ public class VerificadorDeTipos {
         }
         return tipoExp;
     }
+    
+    /**
+     * O método encontra o tipo da primeira parcela lógica
+     * do fator lógico.
+     * 
+     * Se o operador nao está presente, retorna tipo lógico se 
+     * a parcela lógica tem tipo lógico e tipo_invalido caso contrário.
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Fator_logicoContext ctx) {
-        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.parcela_logica());
 
         // Se o operador lógico 'nao' está definido
@@ -48,9 +90,17 @@ public class VerificadorDeTipos {
 
         return tipoExp;
     }
+    
+    /**
+     * O método verifica se o nó é uma folha. Se for folha, retorna tipo lógico
+     * pois é 'verdadeiro' ou 'falso'. Caso contrário, retorna o tipo
+     * da expressão relacional.
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Parcela_logicaContext ctx) {
-        String text = ctx.getText();
         String tipoExp;
 
         // Verifica se é um nó folha (verdadeiro ou falso)
@@ -63,9 +113,21 @@ public class VerificadorDeTipos {
 
         return tipoExp;
     }
+    
+    /**
+     * O método verifica se existe um operador relacional entre
+     * as expressoes aritmeticas. 
+     * Se é encontrado, calcula o tipo dos dois lados da expressão. 
+     * Se se relacionam pela regraTipos(), retorna tipo lógico.
+     * Se não se relacionam, retorna tipo inválido.
+     * Se não tem operadore relacional, retorna o tipo da primeira
+     * expressão aritmética.
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Exp_relacionalContext ctx) {
-        String text = ctx.getText();
         String tipoExp;
 
         // Se existe algum operador relacional, entao resultado é logico
@@ -84,9 +146,18 @@ public class VerificadorDeTipos {
         return tipoExp;
 
     }
+    
+    /**
+     * O método encontra o tipo do primeiro termo
+     * da expressão aritmética. Se outros termos estão presentes,
+     * compara tipo entre termos consecutivos 2 a 2 por
+     * meio de regraTipos().
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Exp_aritmeticaContext ctx) {
-        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.termo());
         if (ctx.outros_termos() == null || ctx.outros_termos().getText().isEmpty()) {
             return tipoExp;
@@ -99,9 +170,18 @@ public class VerificadorDeTipos {
 
         return tipoExp;
     }
+    
+    /**
+     * O método encontra o tipo do primeiro fator
+     * do termo. Se outros fatores estão presentes,
+     * compara tipo entre fatores consecutivos 2 a 2 por
+     * meio de regraTipos().
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.TermoContext ctx) {
-        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.fator());
         if (ctx.outros_fatores() == null && ctx.outros_fatores().getText().isEmpty()) {
             return tipoExp;
@@ -115,8 +195,16 @@ public class VerificadorDeTipos {
         return tipoExp;
     }
 
+    /**
+     * O método encontra o tipo da primeira parcela
+     * do fator. Se outras parcelas estão presentes,
+     * compara tipo entre parcelas consecutivas 2 a 2 por
+     * meio de regraTipos().
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
     public String verificaTipo(LAParser.FatorContext ctx) {
-        String text = ctx.getText();
         String tipoExp = verificaTipo(ctx.parcela());
         if (ctx.outras_parcelas() == null || ctx.outras_parcelas().getText().isEmpty()) {
             return tipoExp;
@@ -129,9 +217,16 @@ public class VerificadorDeTipos {
 
         return tipoExp;
     }
+    
+    /**
+     * O método retorna o tipo da parcela unária se a mesma está presente.
+     * Caso contrário, retorna o tipo da parcela não unária.
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.ParcelaContext ctx) {
-        String text = ctx.getText();
         String tipoExp;
         if (ctx.parcela_unario() != null && !ctx.parcela_unario().getText().isEmpty()) {
             tipoExp = verificaTipo(ctx.parcela_unario());
@@ -141,6 +236,18 @@ public class VerificadorDeTipos {
 
         return tipoExp;
     }
+    
+    /**
+     * O método retorna o tipo da expressao entre parenteses se a mesma está
+     * presente.
+     * Retorna 'real' ou 'inteiro' se as respectivas regras léxicas estão presentes.
+     * Retorna o tipo da função se chamada_partes() está definido
+     * Retorna o tipo do registro se outros_ident() está definido
+     * Retorna o tipo da regra léxica IDENT() se nenhuma outra opção foi encontrada.
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Parcela_unarioContext ctx) {
         String tipoExp = null;
@@ -163,6 +270,14 @@ public class VerificadorDeTipos {
 
         return tipoExp;
     }
+    
+    /**
+     * Retorna o tipo do identificador do endereço se o mesmo está definido
+     * Retorna 'literal' se a regra léxica está definida.
+     * 
+     * @param ctx contexto atual
+     * @return tipo encontrado do contexto atual
+     */
 
     public String verificaTipo(LAParser.Parcela_nao_unarioContext ctx) {
         String tipoExp;
@@ -222,6 +337,18 @@ public class VerificadorDeTipos {
         }
         return tipoExp;
     }
+    
+    /**
+     * O método análise dois tipos (em forma de String) e retorna o tipo da combinação.
+     * 
+     * Retorna tipo1 se tipo1 == tipo2
+     * Retorna 'real' se tipo1 = 'real' e tipo2 = 'inteiro' ou vice versa;
+     * Retorna tipo_inválido caso contrário.
+     * 
+     * @param tipo1
+     * @param tipo2
+     * @return o tipo da combinação de tipo1 e tipo2
+     */
 
     public static String regraTipos(String tipo1, String tipo2) {
         if (tipo1.equals(tipo2)) {
