@@ -26,6 +26,7 @@ public class Comp2 {
         LAParser parser = new LAParser(tokens);
 
         parser.setErrorHandler(new SintaticoErrorStrategy(saidaSintatico));
+        parser.removeErrorListeners();
         try {
             LAParser.ProgramaContext tree = parser.programa();
             
