@@ -6,185 +6,300 @@ import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Comp2Listener extends LABaseListener {
-
+    
     SaidaParser out;
     Escopos escopos;
-    Map<String, String> tipo;
+    Map<String, String> tipos;
     VerificadorDeTipos vdt;
 
     //Essa variavel é usada para contornar a dificuldade que é decidir o tipo de uma variavel
     //enquanto na regra mais_var. 
     String tipoAtual = "";
     
-    //Lista temporaria usada para guardar as variaveis que serão pertencentes a
-    //um registro
+    Boolean dentroDoRegistro;
     List<EntradaTabelaDeSimbolos> simbolosRegistro;
-
+    List<EntradaTabelaDeSimbolos> variaveisRegistroParaAdicionar;
+    
     public Comp2Listener(SaidaParser out) {
         this.out = out;
         this.escopos = new Escopos();
-        this.tipo = new HashMap<>();
-        this.vdt = new VerificadorDeTipos(escopos);
+        this.tipos = new HashMap<>();
+        this.vdt = new VerificadorDeTipos(escopos, tipos);
+        this.dentroDoRegistro = false;
         this.simbolosRegistro = new ArrayList<>();
+        this.variaveisRegistroParaAdicionar = new ArrayList<>();
 
         // add os tipos em LA (key) e C (value)
-        tipo.put("inteiro", "int");
-        tipo.put("literal", "char");    // TODO: verificar como fazer literal em C
-        tipo.put("real", "float");
-        tipo.put("logico", "int");  // contorno para bool em C
-        tipo.put("registro", "type def");
+        tipos.put("inteiro", "int");
+        tipos.put("literal", "char");
+        tipos.put("real", "float");
+        tipos.put("logico", "int");  // contorno para bool em C
+        tipos.put("nenhum", "void");
+        tipos.put("registro", "struct");
+        tipos.put("tipo_registro", "typedef struct");
     }
-
+    
     @Override
     public void enterPrograma(LAParser.ProgramaContext ctx) {
         escopos.empilhar("global");
     }
-
+    
     @Override
     public void exitPrograma(LAParser.ProgramaContext ctx) {
         escopos.desempilhar();
     }
-
+    
     @Override
     public void enterCorpo(LAParser.CorpoContext ctx) {
         escopos.empilhar("corpo");
     }
-
+    
     @Override
     public void exitCorpo(LAParser.CorpoContext ctx) {
         escopos.desempilhar();
     }
+    
+    @Override
+    public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        if (ctx.getText().startsWith("funcao")) {
+            escopos.empilhar("funcao");            
+        } else {
+            escopos.empilhar("procedimento");
+        }
+    }
+    
+    @Override
+    public void exitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        escopos.desempilhar();
+    }
+    
+    @Override
+    public void enterDeclaracao_local(LAParser.Declaracao_localContext ctx){
+        if(ctx.tipo() != null){
+            String s = ctx.IDENT().getText();
+            tipos.put(s, "registro");
+        }
+    }
+    
+    @Override
+    public void exitDeclaracao_local(LAParser.Declaracao_localContext ctx){
+        if(!variaveisRegistroParaAdicionar.isEmpty()){
+            String reg_var_nome;
+            String reg_var_tipo;
+            int reg_var_dim = 0;
 
+            for (EntradaTabelaDeSimbolos e : variaveisRegistroParaAdicionar) {
+                for (EntradaTabelaDeSimbolos f : simbolosRegistro) {
+                    reg_var_nome = e.getNome() + "." + f.getNome();
+                    reg_var_tipo = f.getTipo();
+                    reg_var_dim = f.getDimensao();
+                    escopos.adicionarSimbolo(reg_var_nome, reg_var_tipo, reg_var_dim);
+                }
+            }
+            
+            variaveisRegistroParaAdicionar = new ArrayList<>();
+        }
+    }
+    
     @Override
     public void enterCmd(LAParser.CmdContext ctx) {
+        //checagem se o retorno esta sendo usado em um escopo possivel
+        if (ctx.getText().startsWith("retorne")) {
+            if (escopos.existeRegistro("procedimento")) {
+                out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": comando retorne nao permitido nesse escopo");
+            }
+        }
+        
         if (!ctx.escopoNome.isEmpty()) {
             escopos.empilhar(ctx.escopoNome);
         }
     }
-
+    
     @Override
     public void exitCmd(LAParser.CmdContext ctx) {
         if (!ctx.escopoNome.isEmpty()) {
             escopos.desempilhar();
         }
     }
-
+    
     @Override
     public void enterIdentificador(LAParser.IdentificadorContext ctx) {
-        if (!escopos.existeSimbolo(ctx.IDENT().getText()) && !escopos.existeRegistro(ctx.IDENT().getText())) {
-            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT() + " nao declarado");
+        
+        if (ctx.parent.getText().startsWith(".")) {
+            return;
+        }
+        
+        String nome = ctx.IDENT().getText();
+        if(ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty())
+            nome = nome + "." + ctx.outros_ident().identificador().getText();
+        
+        if (!escopos.existeSimbolo(nome)) {
+            out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " nao declarado");
         }
     }
-
+    
+    @Override
+    public void enterRegistro(LAParser.RegistroContext ctx) {
+        dentroDoRegistro = true;
+        
+        String reg_var_nome = ctx.variavel().n.getText();
+        String reg_var_tipo = ctx.variavel().t.getText();
+        int reg_var_dim = 0;
+        if (!ctx.variavel().d.getText().isEmpty()) {
+            reg_var_dim = Integer.parseInt(ctx.variavel().d.getText());
+        }
+        simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+        
+        for (int i = 0; i < ctx.variavel().mais_var().IDENT().size(); i++) {
+            reg_var_nome = ctx.variavel().mais_var().IDENT(i).getText();
+            reg_var_dim = 0;
+            if (!ctx.variavel().mais_var().dimensao(i).getText().isEmpty()) {
+                reg_var_dim = Integer.parseInt(ctx.variavel().mais_var().dimensao(i).getText());
+            }
+            simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+            
+        }
+        
+        for (EntradaTabelaDeSimbolos e : variaveisRegistroParaAdicionar) {
+            for (EntradaTabelaDeSimbolos f : simbolosRegistro) {
+                reg_var_nome = e.getNome() + "." + f.getNome();
+                reg_var_tipo = f.getTipo();
+                reg_var_dim = f.getDimensao();
+                escopos.adicionarSimbolo(reg_var_nome, reg_var_tipo, reg_var_dim);
+            }
+        }
+        
+        variaveisRegistroParaAdicionar = new ArrayList<>();
+            
+    }
+    
+    @Override
+    public void exitRegistro(LAParser.RegistroContext ctx) {
+        dentroDoRegistro = false;
+    }
+    
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
-        String nome = ctx.nome.getText();
+        EntradaTabelaDeSimbolos ets;
+        String nome = ctx.n.getText();
         
-        //Checagem para ter certeza de que essa variavel não foi definida anteriormente
-        if (!escopos.existeSimbolo(nome)) {
-            //checagem para ver se essa variavel eh um registro
-            if (ctx.tipo().registro()!=null) {
-                tipoAtual = "registro";
-            } else {
-                tipoAtual = ctx.tipo().getText().replace("^", "");
-            }            
-            
-            //checagem para ver se essa é uma variavel inserida dentro de um registro
-            //se for, ao invés de criar uma nova entrada dentro do escopo, essa variavel
-            //será armazenada temporariamente para ser inserida futuramente dentro da entrada
-            //que foi definida como um registro
-            if(ctx.isRegistro){
-                System.out.println("Registro...: "+nome);
-                simbolosRegistro.add(new EntradaTabelaDeSimbolos(nome, tipoAtual));
-            } else {
-                escopos.adicionarSimbolo(nome, tipoAtual);
-                //se esta variavel for um registro, serão inseridos os valores 
-                //internos que foram guardados na lista simbolosRegistro 
-                if(tipoAtual.equals("registro")){
-                    for(EntradaTabelaDeSimbolos entrada: simbolosRegistro){
-                        System.out.println("Inseriu em: "+nome+" o registro: "+entrada.getNome());
-                        escopos.adicionarValorRegistro(entrada.getNome(), entrada.getTipo());
-                    }
-                    simbolosRegistro = new ArrayList<>();                    
-                }
+        if (dentroDoRegistro) {
+            return;
+        }
+        
+        if (ctx.tipo().tipo_estendido() != null) {
+            tipoAtual = ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
+            ets = new EntradaTabelaDeSimbolos(nome, tipoAtual);
+            if (ctx.tipo().tipo_estendido().ponteiros_opcionais() != null
+                    && !ctx.tipo().tipo_estendido().ponteiros_opcionais().getText().isEmpty()) {
+                ets.setAsPonteiro();
             }
+        } else /*if(ctx.tipo().registro()!= null) */ {
+            tipoAtual = "registro";
+            ets = new EntradaTabelaDeSimbolos(nome, tipoAtual);
+        }
 
+        //Checagem para ter certeza de que essa variavel não foi definida anteriormente
+        if (!escopos.existeSimbolo(nome) && !tipos.containsKey(nome)) {
+            escopos.adicionarSimbolo(nome, tipoAtual);
+            // se esta variavel for um registro, serão inseridos os seus elementos
+            // em uma lista auxiliar
+            if (tipoAtual.equals("registro") || 
+                    (tipos.containsKey(tipoAtual) && tipos.get(tipoAtual).equals("registro"))) {
+                variaveisRegistroParaAdicionar.add(ets);
+            }
+            
         } else {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
         }
-
-        if (tipo.get(tipoAtual) == null) {
+        
+        if (!tipos.containsKey(tipoAtual)) {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": tipo " + tipoAtual + " nao declarado");
         }
+        
     }
-
+    
     @Override
     public void exitVariavel(LAParser.VariavelContext ctx) {
         tipoAtual = "";
     }
-
-    @Override
-    public void enterRegistro(LAParser.RegistroContext ctx) {
-        
-    }
-
-    @Override
-    public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
-        escopos.adicionarSimbolo(ctx.IDENT().toString(), ctx.tipoFuncao);
-    }
-
-    @Override
-    public void enterParametro(LAParser.ParametroContext ctx) {
-        for(String nome:ctx.nomes){            
-            escopos.adicionarParametro(nome, ctx.tipo_estendido().getText());
-        }
-        
-    }
-
+    
     @Override
     public void enterMais_var(LAParser.Mais_varContext ctx) {
         String nome;
-        //essa checagem é necessário pois na ultima iteração do mais_var ele tera um IDENT nulo
-        //pois não tem nada nela
+        int dim;
         
-        if (ctx.nome != null) {
-            for(TerminalNode tn : ctx.IDENT()){
-                nome = tn.getText();
-
-                if (!escopos.existeSimbolo(nome)) {
-                    escopos.adicionarSimbolo(nome, tipoAtual);
+        if (dentroDoRegistro) {
+            return;
+        }
+        
+        if (ctx.IDENT() != null) {
+            for (int i = 0; i < ctx.IDENT().size(); i++) {
+                nome = ctx.IDENT(i).getText();
+                if (!ctx.dimensao(i).getText().isEmpty()) {
+                    dim = Integer.parseInt(ctx.dimensao(i).getText());
                 } else {
-                    out.println("Linha " + tn.getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                    dim = 0;
+                }
+                
+                EntradaTabelaDeSimbolos ets;
+                if (!escopos.existeSimbolo(nome)){
+                    ets = new EntradaTabelaDeSimbolos(nome, tipoAtual, dim);
+                    escopos.adicionarSimbolo(ets);
+                    if(tipoAtual.equals("registro") || 
+                        (tipos.containsKey(tipoAtual) && tipos.get(tipoAtual).equals("registro")))
+                        variaveisRegistroParaAdicionar.add(ets);
+                } else {
+                    out.println("Linha " + ctx.IDENT(i).getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
                 }
                 
             }
         }
     }
-
+    
+    @Override
+    public void enterParametro(LAParser.ParametroContext ctx) {
+        String s = ctx.getText();
+    }
+    
     @Override
     public void enterParcela_unario(LAParser.Parcela_unarioContext ctx) {
         //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador
         if (ctx.IDENT() != null) {
+            String nome = ctx.IDENT().getText();
+            if(ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty())
+                nome = nome + ctx.outros_ident().getText();
             if (!escopos.existeSimbolo(ctx.IDENT().getText())) {
-                out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + ctx.IDENT().getText() + " nao declarado");
+                out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " nao declarado");
             }
         }
     }
-
+    
     @Override
     public void enterChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
         if (ctx.expressao() != null) {
             String nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
-            String aux = escopos.buscaSimbolo(nome).getTipo();
+            if (ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty()) {
+                nome = nome + ctx.outros_ident().getText();
+            }
+            String aux = "";
+            
+            if (!escopos.existeSimbolo(nome)) {
+                Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
+                out.println("Linha " + linha + ": identificador " + nome + " nao declarado");
+            } else {
+                aux = escopos.buscaSimbolo(nome).getTipo();
+            }
+            
             if (((LAParser.CmdContext) ctx.parent).getText().contains("^")) {
                 nome = "^" + nome;
             }
-
+            
             if (VerificadorDeTipos.regraTipos(vdt.verificaTipo(ctx), aux).equals("tipo_invalido")) {
                 Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
                 out.println("Linha " + linha + ": atribuicao nao compativel para " + nome);
             }
         }
     }
-
+    
 }

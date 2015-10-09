@@ -17,7 +17,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     
     public SaidaParser out;
     Escopos escopos;
-    Map<String, String> tipo;
+    Map<String, String> tipos;
     VerificadorDeTipos vdt;
     
     // Estratégia não muito correta, o ideal é na tabela de símbolos ter um 
@@ -31,15 +31,15 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     public Comp2Visitor(SaidaParser out){
         this.out = out;
         this.escopos = new Escopos();
-        this.tipo = new HashMap<>();
-        this.vdt = new VerificadorDeTipos(escopos);
+        this.tipos = new HashMap<>();
+        this.vdt = new VerificadorDeTipos(escopos, tipos);
 
         // add os tipos em LA (key) e C (value)
-        tipo.put("inteiro", "int");
-        tipo.put("literal", "char");    // TODO: verificar como fazer literal em C
-        tipo.put("real", "float");
-        tipo.put("logico", "int");  // contorno para bool em C
-        tipo.put("registro", ""); // Nao eh usado realmente, soh usado na tabela de simbolo.
+        tipos.put("inteiro", "int");
+        tipos.put("literal", "char");    // TODO: verificar como fazer literal em C
+        tipos.put("real", "float");
+        tipos.put("logico", "int");  // contorno para bool em C
+        tipos.put("registro", ""); // Nao eh usado realmente, soh usado na tabela de simbolo.
     }
     
     public boolean regraVazia(ParserRuleContext ctx){
@@ -129,7 +129,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             tipoAtual = "";
         }else if(ctx.getStart().getText().equals("tipo")){
             String ident = ctx.IDENT().getText();
-            tipo.put(ident, ident);
+            tipos.put(ident, ident);
             out.println("typedef ");
             visitTipo(ctx.tipo());
             out.println(ident+";");
@@ -177,7 +177,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         tipoAtual = (String)visitTipo(ctx.tipo());
         
         String variavel = "";
-        variavel = variavel(ctx.nome.getText(), ctx.dimensao());
+        variavel = variavel(ctx.n.getText(), ctx.dimensao());
         for(int i=0; i<ctx.mais_var().IDENT().size(); i++){
             out.println(variavel);
             variavel = variavel(ctx.mais_var().IDENT(i).getText(), ctx.mais_var().dimensao(i));
@@ -201,7 +201,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         String variavel = "";
         if(tipoAtual.equals("literal")){
             variavel =
-             tipo.get(tipoAtual) +
+             tipos.get(tipoAtual) +
              ponteiro_opcional +
              " " +
              nome +
@@ -210,7 +210,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
            ;
         }else{
             variavel = 
-             tipo.get(tipoAtual) +
+             tipos.get(tipoAtual) +
              ponteiro_opcional +
              " " +
              nome + 
@@ -220,17 +220,6 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         }
         
         return variavel;
-    }
-    
-    @Override public T visitMais_variaveis(LAParser.Mais_variaveisContext ctx) { 
-        if(!regraVazia(ctx.variavel())){
-            visitVariavel(ctx.variavel());
-        }
-        if(!regraVazia(ctx.mais_variaveis())){
-            visitMais_variaveis(ctx.mais_variaveis());
-        }
-        
-        return null ; 
     }
     
     @Override public T visitDimensao(LAParser.DimensaoContext ctx) {
@@ -264,7 +253,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
             out.identationLevel--;
             out.println("}");
         }else{ //Função
-            String tipoRetorno = tipo.get(ctx.tipo_estendido().getText());
+            String tipoRetorno = tipos.get(ctx.tipo_estendido().getText());
             escopos.adicionarSimbolo(ctx.IDENT().getText(), ctx.tipo_estendido().getText());
             escopos.empilhar(ctx.IDENT().getText());
             out.println(tipoRetorno + " "
@@ -294,7 +283,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
         if(ctx.parametro().tipo_estendido().getText().equals("literal")){
             tipoParam = "char* ";
         }else{
-            tipoParam = tipo.get(ctx.parametro().tipo_estendido().getText()) + " ";
+            tipoParam = tipos.get(ctx.parametro().tipo_estendido().getText()) + " ";
         }
         
         parametros_opcional += tipoParam;

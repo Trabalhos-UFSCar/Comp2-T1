@@ -37,17 +37,12 @@ declaracao_local :
 ;
 
 
-variavel returns [Boolean isRegistro]   
-    @init{$isRegistro=false;} :  
-    nome=IDENT dimensao mais_var
-    {$mais_var.isRegistro=$isRegistro;}
-    ':' 
-    tp=tipo 
+variavel :  
+    n=IDENT d=dimensao mais_var ':' t=tipo 
 ;
 
-mais_var returns [Boolean isRegistro]  
-@init{$isRegistro=false;} : 
-    (',' nome=IDENT dimensao)*
+mais_var : 
+    (',' n=IDENT d=dimensao)*
 ;
 
 identificador  :  
@@ -73,24 +68,13 @@ tipo :
     registro | tipo_estendido 
 ;
 
-mais_ident  returns [List<String> nomes]
-    @init{$nomes=new ArrayList<>();}:  
-    ',' {$nomes.add($nome.text);} nome=identificador 
-    outrosNomes=mais_ident 
-    {if($outrosNomes.text!=null){
-        $nomes.addAll($outrosNomes.nomes);
-        }
-    }
-    | 
+mais_ident  :  
+    (',' nome=identificador )*
+
 ;
 
-mais_variaveis  returns [Boolean isRegistro]   
-    @init{$isRegistro=false;} :  
-    variavel 
-    {$variavel.isRegistro=$isRegistro;}
-    mais_variaveis
-    {$mais_variaveis.isRegistro=$isRegistro;} 
-    | 
+mais_variaveis  :  
+    (variavel)* 
 ;
 
 tipo_basico  :  
@@ -114,30 +98,21 @@ valor_constante  :
 ;
 
 registro  :  
-    'registro'
-    variavel 
-    {$variavel.isRegistro=true;}
-    mais_variaveis 
-    {$mais_variaveis.isRegistro=true;}
-    'fim_registro' 
+    'registro' variavel  mais_variaveis 'fim_registro' 
 ;
 
-declaracao_global returns [String tipoFuncao] 
-    @init{$tipoFuncao="procedimento";} :
-    'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' 
-    | {$tipoFuncao="funcao";} 'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' 
+declaracao_global :
+    'procedimento' IDENT '(' parametros_opcional ')' declaracoes_locais comandos 'fim_procedimento' | 
+    'funcao' IDENT '(' parametros_opcional ')' ':' tipo_estendido declaracoes_locais comandos 'fim_funcao' 
 ;
 
 parametros_opcional  :  
     parametro |   
 ;
 
-parametro returns [List<String> nomes] 
-    @init{$nomes = new ArrayList<>();} :  
+parametro :  
     var_opcional nome=identificador 
-    {$nomes.add($nome.text);} 
     outrosNomes=mais_ident 
-    {$nomes.addAll($outrosNomes.nomes);}
     ':' tipo_estendido mais_parametros 
 ;
 

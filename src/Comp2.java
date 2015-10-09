@@ -1,4 +1,3 @@
-//import src.LAParser.ProgramaContext;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +43,8 @@ public class Comp2 {
         } catch (ParseCancellationException pce) {
             saidaSintatico.println(pce.getMessage());
         } catch (Exception e) {
-            System.out.println("Erro:" + e.getMessage());
+            //System.out.println("Erro:" + e.getMessage());
+            e.printStackTrace();
         }
         
         if(!saidaSintatico.toString().isEmpty() || !saidaSemantico.toString().isEmpty())

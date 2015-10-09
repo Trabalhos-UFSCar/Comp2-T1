@@ -1,3 +1,6 @@
+
+import java.util.Map;
+
 /**
  * Esta classe é responsável pela verificação do tipo de uma expressão ou outros
  * elementos derivados de uma expressão (tais como um identificador).
@@ -12,13 +15,15 @@ public class VerificadorDeTipos {
     
     //Contém todas as variáveis de todos os escopos criados durante o semântico
     Escopos escopos;
+    Map<String, String> tipos;
     
     /**
      * Inicializa a classe como a informação do escopos que precisam verificação de tipo
      * @param escopos escopos que contém informação das variáveis
      */
-    public VerificadorDeTipos(Escopos escopos) {
+    public VerificadorDeTipos(Escopos escopos, Map<String, String> tipos) {
         this.escopos = escopos;
+        this.tipos = tipos;
     }
     
     /**
@@ -296,19 +301,14 @@ public class VerificadorDeTipos {
         if (ctx.outros_ident() == null || ctx.outros_ident().getText().isEmpty()){//|| ctx.outros_ident().identificador() == null) {
             return tipo1;
         } else {
-            String tipo2 = verificaTipo(ctx.outros_ident());
+            String nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
+            nome = nome + ctx.outros_ident().getText();
+            String tipo2 = escopos.buscaSimbolo(nome).getTipo();
             
             return regraTipos(tipo1, tipo2);
         }
 
     }
-
-//    public String verificaTipo(LAParser.Outros_identContext ctx) {
-//        String text = ctx.getText();
-//        String tipoExp = verificaTipo(ctx.identificador());
-//
-//        return tipoExp;
-//    }
     
     public String verificaTipo(LAParser.Outros_identContext ctx) {
         String text = ctx.getText();
@@ -335,6 +335,34 @@ public class VerificadorDeTipos {
             tipoExp = regraTipos(tipoExp, tipoOutroTermo);
 
         }
+        return tipoExp;
+    }
+    
+    public String verificaTipo(LAParser.TipoContext ctx){
+        String tipoExp;
+        
+        if(ctx.getText().startsWith("registro"))
+            tipoExp = "registro";
+        else
+            tipoExp = verificaTipo(ctx.tipo_estendido());
+        
+        return tipoExp;
+    }
+    
+    public String verificaTipo(LAParser.Tipo_estendidoContext ctx){
+        String tipoExp = verificaTipo(ctx.tipo_basico_ident());
+        
+        return tipoExp;
+    }
+    
+    public String verificaTipo(LAParser.Tipo_basico_identContext ctx){
+        String tipoExp;
+        
+        if(ctx.tipo_basico() != null ){
+            tipoExp = ctx.tipo_basico().getText();
+        } else
+            tipoExp = tipos.get(ctx.IDENT().getText());
+        
         return tipoExp;
     }
     
