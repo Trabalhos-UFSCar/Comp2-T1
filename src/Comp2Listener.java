@@ -130,7 +130,7 @@ public class Comp2Listener extends LABaseListener {
                 if (!escopos.existeSimbolo(nome)) {
                     escopos.adicionarSimbolo(nome, tipoAtual);
                 } else {
-                    out.println("Linha " + ctx.nome.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                    out.println("Linha " + tn.getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
                 }
             }
         }
