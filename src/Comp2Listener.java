@@ -1,6 +1,7 @@
 
 import java.util.HashMap;
 import java.util.Map;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Comp2Listener extends LABaseListener {
 
@@ -121,13 +122,16 @@ public class Comp2Listener extends LABaseListener {
         String nome;
         //essa checagem é necessário pois na ultima iteração do mais_var ele tera um IDENT nulo
         //pois não tem nada nela
+        
         if (ctx.nome != null) {
-            nome = ctx.nome.getText();
+            for(TerminalNode tn : ctx.IDENT()){
+                nome = tn.getText();
 
-            if (!escopos.existeSimbolo(nome)) {
-                escopos.adicionarSimbolo(nome, tipoAtual);
-            } else {
-                out.println("Linha " + ctx.nome.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                if (!escopos.existeSimbolo(nome)) {
+                    escopos.adicionarSimbolo(nome, tipoAtual);
+                } else {
+                    out.println("Linha " + ctx.nome.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                }
             }
         }
     }
