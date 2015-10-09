@@ -303,9 +303,9 @@ public class VerificadorDeTipos {
         } else {
             String nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
             nome = nome + ctx.outros_ident().getText();
-            String tipo2 = escopos.buscaSimbolo(nome).getTipo();
+            Object tipo2 = escopos.buscaSimbolo(nome);
             
-            return regraTipos(tipo1, tipo2);
+            return regraTipos(tipo1, tipo1);
         }
 
     }

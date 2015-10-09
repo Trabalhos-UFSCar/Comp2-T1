@@ -61,11 +61,7 @@ public class Comp2Listener extends LABaseListener {
     
     @Override
     public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
-        if (ctx.getText().startsWith("funcao")) {
-            escopos.empilhar("funcao");            
-        } else {
-            escopos.empilhar("procedimento");
-        }
+
     }
     
     @Override
@@ -131,7 +127,7 @@ public class Comp2Listener extends LABaseListener {
         
         String nome = ctx.IDENT().getText();
         if(ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty())
-            nome = nome + "." + ctx.outros_ident().identificador().getText();
+            nome = nome + ctx.outros_ident().getText();
         
         if (!escopos.existeSimbolo(nome)) {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " nao declarado");
@@ -158,6 +154,26 @@ public class Comp2Listener extends LABaseListener {
             }
             simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
             
+        }
+        
+        for(LAParser.VariavelContext v : ctx.mais_variaveis().variavel()){
+            reg_var_nome = v.n.getText();
+            reg_var_tipo = v.t.getText();
+            reg_var_dim = 0;
+            if (!v.d.getText().isEmpty()) {
+                reg_var_dim = Integer.parseInt(v.d.getText());
+            }
+            simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+
+            for (int i = 0; i < v.mais_var().IDENT().size(); i++) {
+                reg_var_nome = v.mais_var().IDENT(i).getText();
+                reg_var_dim = 0;
+                if (!v.mais_var().dimensao(i).getText().isEmpty()) {
+                    reg_var_dim = Integer.parseInt(v.mais_var().dimensao(i).getText());
+                }
+                simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+
+            }
         }
         
         for (EntradaTabelaDeSimbolos e : variaveisRegistroParaAdicionar) {
@@ -190,10 +206,6 @@ public class Comp2Listener extends LABaseListener {
         if (ctx.tipo().tipo_estendido() != null) {
             tipoAtual = ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
             ets = new EntradaTabelaDeSimbolos(nome, tipoAtual);
-            if (ctx.tipo().tipo_estendido().ponteiros_opcionais() != null
-                    && !ctx.tipo().tipo_estendido().ponteiros_opcionais().getText().isEmpty()) {
-                ets.setAsPonteiro();
-            }
         } else /*if(ctx.tipo().registro()!= null) */ {
             tipoAtual = "registro";
             ets = new EntradaTabelaDeSimbolos(nome, tipoAtual);
@@ -265,11 +277,14 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterParcela_unario(LAParser.Parcela_unarioContext ctx) {
         //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador
+        for(int i = 0; i < ctx.getChildCount(); i++)
+            System.out.println(i + " " + ctx.getChild(i).getText());
+        
         if (ctx.IDENT() != null) {
             String nome = ctx.IDENT().getText();
-            if(ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty())
-                nome = nome + ctx.outros_ident().getText();
-            if (!escopos.existeSimbolo(ctx.IDENT().getText())) {
+            if(ctx.chamada_partes() != null && ctx.chamada_partes().outros_ident() != null)
+                nome = nome + ctx.chamada_partes().outros_ident().getText();
+            if (!escopos.existeSimbolo(nome)) {
                 out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " nao declarado");
             }
         }
@@ -277,28 +292,30 @@ public class Comp2Listener extends LABaseListener {
     
     @Override
     public void enterChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
-        if (ctx.expressao() != null) {
-            String nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
+        String t1 = vdt.verificaTipo(ctx);
+        String t2 = null;
+        String nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
+        if (ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty()) {
+            nome = nome + ctx.outros_ident().getText();
+        }
+
+        if (!escopos.existeSimbolo(nome)) {
+            Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
+            out.println("Linha " + linha + ": identificador " + nome + " nao declarado");
+        } else {
+            t2 = escopos.buscaSimbolo(nome).getTipo();
+        }
+        
+        if (VerificadorDeTipos.regraTipos(t1, t2).equals("tipo_invalido")) {
+            nome = ((LAParser.CmdContext) ctx.parent).IDENT().getText();
             if (ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty()) {
                 nome = nome + ctx.outros_ident().getText();
             }
-            String aux = "";
-            
-            if (!escopos.existeSimbolo(nome)) {
-                Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
-                out.println("Linha " + linha + ": identificador " + nome + " nao declarado");
-            } else {
-                aux = escopos.buscaSimbolo(nome).getTipo();
-            }
-            
             if (((LAParser.CmdContext) ctx.parent).getText().contains("^")) {
                 nome = "^" + nome;
             }
-            
-            if (VerificadorDeTipos.regraTipos(vdt.verificaTipo(ctx), aux).equals("tipo_invalido")) {
-                Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
-                out.println("Linha " + linha + ": atribuicao nao compativel para " + nome);
-            }
+            Integer linha = ((LAParser.CmdContext) ctx.parent).IDENT().getSymbol().getLine();
+            out.println("Linha " + linha + ": atribuicao nao compativel para " + nome);
         }
     }
     

@@ -8,7 +8,6 @@ import java.util.List;
 public class EntradaTabelaDeSimbolos {
     private String nome, tipo;
     private Integer dimensao;//TODO: checar se´será necessário este valor 
-    private Boolean isPonteiro, isRegistro, isProcedimento, isFuncao;
     private List<EntradaTabelaDeSimbolos> valoresRegistro;
     private List<EntradaTabelaDeSimbolos> parametrosFuncao;
     
@@ -16,7 +15,6 @@ public class EntradaTabelaDeSimbolos {
         this.nome = nome;
         this.tipo = tipo;
         dimensao = 0;
-        isPonteiro = isRegistro = isProcedimento = isFuncao = false;
         valoresRegistro = new ArrayList<>();
         parametrosFuncao = new ArrayList<>();
     }   
@@ -25,7 +23,6 @@ public class EntradaTabelaDeSimbolos {
         this.nome = nome;
         this.tipo = tipo;
         this.dimensao = dimensao;
-        isPonteiro = isRegistro = isProcedimento = isFuncao = false;
         valoresRegistro = new ArrayList<>();
         parametrosFuncao = new ArrayList<>();
     }
@@ -51,22 +48,6 @@ public class EntradaTabelaDeSimbolos {
     public Integer getDimensao() {
         return dimensao;
     }
-
-    public void setAsPonteiro() {
-        this.isPonteiro = true;
-    }
-
-    public void setAsRegistro() {
-        this.isRegistro = true;
-    }
-
-    public void setAsProcedimento() {
-        this.isProcedimento = true;
-    }
-
-    public void setAsFuncao() {
-        this.isFuncao = true;
-    }   
     
     @Override
     public String toString() {
