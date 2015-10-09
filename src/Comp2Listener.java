@@ -102,13 +102,19 @@ public class Comp2Listener extends LABaseListener {
     @Override
     public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         escopos.adicionarSimbolo(ctx.IDENT().toString(), ctx.tipoFuncao);
-        
-        if(ctx.parametros_opcional()!=null){
-            
+
+        if (ctx.parametros_opcional() != null) {
+
         }
     }
-    
-    @Override public void enterParametro(LAParser.ParametroContext ctx) { }
+
+    @Override
+    public void enterParametro(LAParser.ParametroContext ctx) {
+        for(String nome:ctx.nomes){            
+            escopos.adicionarParametro(nome, ctx.tipo_estendido().getText());
+        }
+        
+    }
 
     @Override
     public void enterMais_var(LAParser.Mais_varContext ctx) {

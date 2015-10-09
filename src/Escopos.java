@@ -57,4 +57,12 @@ public class Escopos {
     public List getTodasTabelas() {
         return pilha;
     }
+    
+    public void adicionarParametro(String nome, String tipo) {
+       topo().adicionarParametro(nome, tipo);
+    }
+    
+    public void adicionarValorRegistro(String nome, String tipo) {
+        topo().adicionarValorRegistro(nome, tipo);
+    }
 }

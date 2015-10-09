@@ -72,8 +72,14 @@ tipo returns[Boolean isRegistro]
     | tipo_estendido {$isRegistro=false;} 
 ;
 
-mais_ident  :  
-    ',' identificador mais_ident 
+mais_ident  returns [List<String> nomes]
+    @init{$nomes=new ArrayList<>();}:  
+    ',' {$nomes.add($nome.text);} nome=identificador 
+    outrosNomes=mais_ident 
+    {if($outrosNomes.text!=null){
+        $nomes.addAll($outrosNomes.nomes);
+        }
+    }
     | 
 ;
 
@@ -116,13 +122,19 @@ parametros_opcional  :
     parametro |   
 ;
 
-parametro  :  
-    var_opcional identificador mais_ident ':' tipo_estendido mais_parametros 
+parametro returns [List<String> nomes] 
+    @init{$nomes = new ArrayList<>();} :  
+    var_opcional nome=identificador 
+    {$nomes.add($nome.text);} 
+    outrosNomes=mais_ident 
+    {$nomes.addAll($outrosNomes.nomes);}
+    ':' tipo_estendido mais_parametros 
 ;
 
 var_opcional  :  'var' |   ;
 
-mais_parametros  :  ',' parametro |   ;
+mais_parametros : 
+    ',' parametro |   ;
 
 declaracoes_locais :
     declaracao_local declaracoes_locais |     

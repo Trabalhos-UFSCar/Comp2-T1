@@ -1,13 +1,13 @@
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class TabelaDeSimbolos {
     private String escopo;
-    private List<EntradaTabelaDeSimbolos> simbolos;
+    private LinkedList<EntradaTabelaDeSimbolos> simbolos;
     
     public TabelaDeSimbolos(String escopo) {
-        simbolos = new ArrayList<EntradaTabelaDeSimbolos>();
+        simbolos = new LinkedList<>();
         this.escopo = escopo;
     }
     
@@ -40,6 +40,14 @@ public class TabelaDeSimbolos {
     
     public List<EntradaTabelaDeSimbolos> todosSimbolos(){
         return simbolos;
+    }
+    
+    public void adicionarParametro(String nome, String tipo) {
+       simbolos.peek().adicionarParametro(nome, tipo);
+    }
+    
+    public void adicionarValorRegistro(String nome, String tipo) {
+        simbolos.peek().adicionarValorRegistro(nome, tipo);
     }
     
     @Override

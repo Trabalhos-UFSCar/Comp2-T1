@@ -16,7 +16,7 @@ public class EntradaTabelaDeSimbolos {
         this.tipo = tipo;
         valoresRegistro = new ArrayList<>();
         parametrosFuncao = new ArrayList<>();
-    }
+    }   
     
     public EntradaTabelaDeSimbolos(String nome, String tipo, Integer dimensao) {
         this.nome = nome;
