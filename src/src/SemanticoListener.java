@@ -10,21 +10,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class SemanticoListener extends LABaseListener {
     
+    // StringBuffer para saida
     SaidaParser out;
+    // Pilha de escopos
     Escopos escopos;
+    // Tipos disponíveis
     Map<String, String> tipos;
     VerificadorDeTipos vdt;
 
-    //Essa variavel é usada para contornar a dificuldade que é decidir o tipo de uma variavel
-    //enquanto na regra mais_var. 
+    // Essa variavel é usada para salvar
+    // o último tipo de variável instanciado
+    // para registros ou lista de variáveis de
+    // mesmo tipo tais como em mais_var();
     String tipoAtual = "";
     
+    /* Variáveis utilizadas para registros */
     Boolean dentroDoRegistro;
-    List<EntradaTabelaDeSimbolos> simbolosRegistro;
+    List<EntradaTabelaDeSimbolos> simbolosDoRegistro;
     List<EntradaTabelaDeSimbolos> variaveisRegistroParaAdicionar;
     
     public SemanticoListener(SaidaParser out) {
@@ -33,7 +38,7 @@ public class SemanticoListener extends LABaseListener {
         this.tipos = new HashMap<>();
         this.vdt = new VerificadorDeTipos(escopos, tipos);
         this.dentroDoRegistro = false;
-        this.simbolosRegistro = new ArrayList<>();
+        this.simbolosDoRegistro = new ArrayList<>();
         this.variaveisRegistroParaAdicionar = new ArrayList<>();
 
         // add os tipos em LA (key) e C (value)
@@ -44,36 +49,43 @@ public class SemanticoListener extends LABaseListener {
         tipos.put("registro","struct");
     }
     
+    /*
+        O método empilha o escopo global do programa.
+    */
     @Override
     public void enterPrograma(LAParser.ProgramaContext ctx) {
         escopos.empilhar("global");
     }
     
+    /*
+        O método desempilha o escopo global do programa.
+    */
     @Override
     public void exitPrograma(LAParser.ProgramaContext ctx) {
         escopos.desempilhar();
     }
     
+    /*
+        O método empilha o escopo do corpo do programa.
+    */
     @Override
     public void enterCorpo(LAParser.CorpoContext ctx) {
         escopos.empilhar("corpo");
     }
     
+    /*
+        O método desempilha o escopo do corpo do programa.
+    */
     @Override
     public void exitCorpo(LAParser.CorpoContext ctx) {
         escopos.desempilhar();
     }
     
-    @Override
-    public void enterDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
-
-    }
-    
-    @Override
-    public void exitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
-        escopos.desempilhar();
-    }
-    
+    /*
+        O método tem duas funções principais:
+        Adicionar novos tipos a lista de tipos quando são definidos
+        Adicionar constante a tabela de símbolos
+    */
     @Override
     public void enterDeclaracao_local(LAParser.Declaracao_localContext ctx){
         if(ctx.tipo() != null){
@@ -86,6 +98,19 @@ public class SemanticoListener extends LABaseListener {
         }
     }
     
+    /*
+        O método tem como objetivo adicionar ao escopo o
+        elementos dos registros. Como o registro é definido após
+        a lista de variáveis daquele registro, elas são inseridas
+        na lista variaveisRegistroParaAdicionar. Quando a declarações
+        locais terminam, os registros e seus elementos já foram lidos 
+        pela árvore e adicionados a lista simbolosDoRegistro.
+    
+        Este método vai adicionar no escopo as combinações de
+        elementos definidos como registro e seus sub-elementos.
+        Exemplo, x é um registro e y e z são seus elementos.
+        Este método adiciona x.y e x.z no escopo.
+    */
     @Override
     public void exitDeclaracao_local(LAParser.Declaracao_localContext ctx){
         if(!variaveisRegistroParaAdicionar.isEmpty()){
@@ -94,14 +119,17 @@ public class SemanticoListener extends LABaseListener {
             int reg_var_dim = 0;
 
             for (EntradaTabelaDeSimbolos e : variaveisRegistroParaAdicionar) {
-                for (EntradaTabelaDeSimbolos f : simbolosRegistro) {
+                for (EntradaTabelaDeSimbolos f : simbolosDoRegistro) {
+                    //combinacao do nome x.y
                     reg_var_nome = e.getNome() + "." + f.getNome();
+                    //tipo de y
                     reg_var_tipo = f.getTipo();
+                    //dim de y
                     reg_var_dim = f.getDimensao();
                     escopos.adicionarSimbolo(reg_var_nome, reg_var_tipo, reg_var_dim);
                 }
             }
-            
+            //Zera a lista
             variaveisRegistroParaAdicionar = new ArrayList<>();
         }
     }
@@ -125,13 +153,28 @@ public class SemanticoListener extends LABaseListener {
         }
     }
     
+    /*
+        O metodo tem como objetivo checar se todos os elementos
+        foram previamente inseridos na tabela de simbolos.
+        Por exemplo, os elementos sao inseridos na tabela por meio 
+        da regra variavel(), mais_var() ou mais_variavel(). Se um 
+        identificador nao foi inserido corretamente, este metodo 
+        vai adicionar a mensagem de erro.
+    
+        Existe apenas um caso especial. Se o identificador esta dentro
+        de um mais_indent(), nao e feita a verificacao, pois se y e um
+        registro, y esta na tabela, y.x esta na tabela mas x nao esta.
+    */
+    
     @Override
     public void enterIdentificador(LAParser.IdentificadorContext ctx) {
         
+        //Se o pai comeca com '.', entao eh mais_ident() e nao verifica
         if (ctx.parent.getText().startsWith(".")) {
             return;
         }
         
+        //Encontra o nome completo do identificador.
         String nome = ctx.IDENT().getText();
         if(ctx.outros_ident() != null && !ctx.outros_ident().getText().isEmpty())
             nome = nome + ctx.outros_ident().getText();
@@ -140,6 +183,18 @@ public class SemanticoListener extends LABaseListener {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " nao declarado");
         }
     }
+    
+    /*
+        O metodo adiciona os elementos definidos dentro de um registro
+        dentro da lista simbolosDoRegistro.
+    
+        Como os simbolos do registro nao sao adicionados ao escopo
+        que nem outras variaveis, o booleano dentroDoRegistro bloqueia que
+        variaveis de registro sejam adicionadas no escopo.
+    
+        Note que variavel() e mais_var() sao do mesmo tipo. E mais_variaveis()
+        e uma lista dos anteriores.
+    */
     
     @Override
     public void enterRegistro(LAParser.RegistroContext ctx) {
@@ -151,7 +206,7 @@ public class SemanticoListener extends LABaseListener {
         if (!ctx.variavel().d.getText().isEmpty()) {
             reg_var_dim = Integer.parseInt(ctx.variavel().d.getText());
         }
-        simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+        simbolosDoRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
         
         for (int i = 0; i < ctx.variavel().mais_var().IDENT().size(); i++) {
             reg_var_nome = ctx.variavel().mais_var().IDENT(i).getText();
@@ -159,7 +214,7 @@ public class SemanticoListener extends LABaseListener {
             if (!ctx.variavel().mais_var().dimensao(i).getText().isEmpty()) {
                 reg_var_dim = Integer.parseInt(ctx.variavel().mais_var().dimensao(i).getText());
             }
-            simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+            simbolosDoRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
             
         }
         
@@ -170,7 +225,7 @@ public class SemanticoListener extends LABaseListener {
             if (!v.d.getText().isEmpty()) {
                 reg_var_dim = Integer.parseInt(v.d.getText());
             }
-            simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+            simbolosDoRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
 
             for (int i = 0; i < v.mais_var().IDENT().size(); i++) {
                 reg_var_nome = v.mais_var().IDENT(i).getText();
@@ -178,27 +233,42 @@ public class SemanticoListener extends LABaseListener {
                 if (!v.mais_var().dimensao(i).getText().isEmpty()) {
                     reg_var_dim = Integer.parseInt(v.mais_var().dimensao(i).getText());
                 }
-                simbolosRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
+                simbolosDoRegistro.add(new EntradaTabelaDeSimbolos(reg_var_nome, reg_var_tipo, reg_var_dim));
 
             }
         }
             
     }
     
+    /*
+        O metodo retira o bloqueio de variaveis no escopo tradicional.
+    */
+    
     @Override
     public void exitRegistro(LAParser.RegistroContext ctx) {
         dentroDoRegistro = false;
     }
     
+    /*
+        O metodo adiciona uma variavel a tabela de simbolos sendo usada
+        no momento, verifica se duas ou mais variaveis tem o mesmo nome,
+        se o tipo de uma variavel nao foi definido.
+    
+        O tipo de uma variavel vem de tipo_estendido..tipo_basico_ident()
+        ou é um registro caso contrário.
+    |   O registro entra na tabela de simbolos com o tipo registro.
+        Os elementos do registro são inseridos depois das declaracoes locais.
+    */
+    
     @Override
     public void enterVariavel(LAParser.VariavelContext ctx) {
         EntradaTabelaDeSimbolos ets;
         String nome = ctx.n.getText();
-        
+        // bloqueia insercao
         if (dentroDoRegistro) {
             return;
         }
-        
+        // encontra tipo da variavel
         if (ctx.tipo().tipo_estendido() != null) {
             tipoAtual = ctx.tipo().tipo_estendido().tipo_basico_ident().getText();
             ets = new EntradaTabelaDeSimbolos(nome, tipoAtual);
@@ -211,32 +281,42 @@ public class SemanticoListener extends LABaseListener {
         if (!escopos.existeSimbolo(nome)) {
             escopos.adicionarSimbolo(nome, tipoAtual);
             // se esta variavel for um registro, serão inseridos os seus elementos
-            // em uma lista auxiliar
+            // em uma lista auxiliar depois que registro passou na arvore
             if (tipoAtual.equals("registro") || 
                     (tipos.containsKey(tipoAtual) && tipos.get(tipoAtual).equals("registro"))) {
                 variaveisRegistroParaAdicionar.add(ets);
             }
-            
+        // simbolo ja existe
         } else {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": identificador " + nome + " ja declarado anteriormente");
         }
-        
+        // tipo nao existe
         if (!tipos.containsKey(tipoAtual)) {
             out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": tipo " + tipoAtual + " nao declarado");
         }
         
     }
-    
+    /*
+        Se outra variavel for instanciada, elas podem ser de tipos diferentes
+        O método reseta tipoAtual.
+    */
     @Override
     public void exitVariavel(LAParser.VariavelContext ctx) {
         tipoAtual = "";
     }
     
+    /*
+        O método funciona similar a variavel(), exceto que os
+        elementos variaveis() está em uma lista.
+    
+        Não verifica se um tipo não existe, isso é papel de variavel()
+   
+    */
     @Override
     public void enterMais_var(LAParser.Mais_varContext ctx) {
         String nome;
         int dim;
-        
+        // bloqueia insercao
         if (dentroDoRegistro) {
             return;
         }
@@ -270,6 +350,10 @@ public class SemanticoListener extends LABaseListener {
         String s = ctx.getText();
     }
     
+    /*
+        O método faz checagem do identificador da parcela unaria, 
+        similar a identificador().
+    */
     @Override
     public void enterParcela_unario(LAParser.Parcela_unarioContext ctx) {
         //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador        
@@ -282,6 +366,13 @@ public class SemanticoListener extends LABaseListener {
             }
         }
     }
+    
+    /*
+        O método verifica se uma atribuição é válida.
+        Ele encontra o tipo da expressao() e do ident() e compara-os
+        por meio da regraDeTipos()
+        Também faz checagem se a variavel a ser atribuida ja foi declarada.
+    */
     
     @Override
     public void enterChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) {
