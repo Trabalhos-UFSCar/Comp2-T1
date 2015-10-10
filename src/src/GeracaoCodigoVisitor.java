@@ -9,12 +9,7 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
- * This class provides an empty implementation of {@link LAVisitor},
- * which can be extended to create a visitor which only needs to handle a subset
- * of the available methods.
- *
- * @param <T> The return type of the visit operation. Use {@link Void} for
- * operations with no return type.
+ * Esta classe é responsável pela geração de código.
  */
 public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
     
@@ -45,6 +40,12 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         tipos.put("registro", ""); // Nao eh usado realmente, soh usado na tabela de simbolo.
     }
     
+    /*
+        Métodos auxiliares para verificarem se um regra de contexto
+        ou se um nó é/está vazio. Em alguns casos, ctx != null
+        mas tem comprimento vazio.
+    
+    */
     public boolean regraVazia(ParserRuleContext ctx){
         return ctx == null || ctx.getText().equals("");
     } 
@@ -59,7 +60,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitPrograma(LAParser.ProgramaContext ctx) { 
+    @Override 
+    public T visitPrograma(LAParser.ProgramaContext ctx) { 
         escopos.empilhar("global");
         
         out.println("/* Arquivo gerado automaticamente */\n");
@@ -87,7 +89,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { 
+    @Override 
+    public T visitDeclaracoes(LAParser.DeclaracoesContext ctx) { 
         if(regraVazia(ctx)){
             return null;
         }
@@ -104,7 +107,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDecl_local_global(LAParser.Decl_local_globalContext ctx) { 
+    @Override 
+    public T visitDecl_local_global(LAParser.Decl_local_globalContext ctx) { 
         if(regraVazia(ctx)){
             return null; 
         }else if(!regraVazia(ctx.declaracao_local())){
@@ -120,7 +124,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
+    @Override 
+    public T visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
         if(!regraVazia(ctx.variavel())){
             visitVariavel(ctx.variavel());
         }else if(ctx.getStart().getText().equals("constante")){
@@ -140,7 +145,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null;
     }
     
-    @Override public T visitTipo(LAParser.TipoContext ctx) {
+    @Override 
+    public T visitTipo(LAParser.TipoContext ctx) {
         String tipo = "";
         
         if(!regraVazia(ctx.registro())){
@@ -153,7 +159,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)tipo;
     }
     
-    @Override public T visitRegistro(LAParser.RegistroContext ctx) { 
+    @Override 
+    public T visitRegistro(LAParser.RegistroContext ctx) { 
         String registro = "";
         
         registro += "struct{";
@@ -173,7 +180,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitVariavel(LAParser.VariavelContext ctx) {
+    @Override 
+    public T visitVariavel(LAParser.VariavelContext ctx) {
         if(ctx.tipo().getStart().getText().equals("^")){
             isPonteiro = true;
         }
@@ -225,7 +233,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return variavel;
     }
     
-    @Override public T visitDimensao(LAParser.DimensaoContext ctx) {
+    @Override 
+    public T visitDimensao(LAParser.DimensaoContext ctx) {
         if(regraVazia(ctx)){
             return (T) "";
         }
@@ -245,7 +254,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
+    @Override 
+    public T visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) { 
         if(ctx.getStart().getText().equals("procedimento")){
             escopos.empilhar(ctx.IDENT().getText());
             out.println("void " + ctx.IDENT().getText()+"("+visitParametros_opcional(ctx.parametros_opcional())+"){");
@@ -273,7 +283,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitParametros_opcional(LAParser.Parametros_opcionalContext ctx) { 
+    @Override 
+    public T visitParametros_opcional(LAParser.Parametros_opcionalContext ctx) { 
         if(regraVazia(ctx.parametro())){
             return (T)"";
         }
@@ -308,7 +319,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)parametros_opcional; 
     }
     
-    @Override public T visitCorpo(LAParser.CorpoContext ctx) {
+    @Override 
+    public T visitCorpo(LAParser.CorpoContext ctx) {
         escopos.empilhar("corpo");
         
         visitDeclaracoes_locais(ctx.declaracoes_locais());
@@ -320,7 +332,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitDeclaracoes_locais(LAParser.Declaracoes_locaisContext ctx){
+    @Override 
+    public T visitDeclaracoes_locais(LAParser.Declaracoes_locaisContext ctx){
         if(regraVazia(ctx)){
             return null;
         }
@@ -332,7 +345,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null;
     }
     
-    @Override public T visitComandos(LAParser.ComandosContext ctx) { 
+    @Override 
+    public T visitComandos(LAParser.ComandosContext ctx) { 
         if(regraVazia(ctx)){
             return null;
         }
@@ -344,7 +358,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitCmd(LAParser.CmdContext ctx) {
+    @Override 
+    public T visitCmd(LAParser.CmdContext ctx) {
         String cmd = "";
         
         if(ctx.getStart().getText().equals("leia")){
@@ -439,7 +454,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         out.identationLevel--;
     }
     
-    @Override public T visitSelecao(LAParser.SelecaoContext ctx) {        
+    @Override 
+    public T visitSelecao(LAParser.SelecaoContext ctx) {        
         for(int i=0; i<ctx.constantes().size(); i++){
             visitConstantes(ctx.constantes(i));
             out.identationLevel++;
@@ -451,7 +467,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitConstantes(LAParser.ConstantesContext ctx) {
+    @Override 
+    public T visitConstantes(LAParser.ConstantesContext ctx) {
         for(int i=0; i<ctx.numero_intervalo().size(); i++){
             String valorInicialString = "";
             if(!regraVazia(ctx.numero_intervalo(i).op_unario())){
@@ -478,7 +495,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null; 
     }
     
-    @Override public T visitSenao_opcional(LAParser.Senao_opcionalContext ctx) { 
+    @Override 
+    public T visitSenao_opcional(LAParser.Senao_opcionalContext ctx) { 
         String senao_opcional = "";
         
         out.identationLevel++;
@@ -490,7 +508,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return null;
     }
     
-    @Override public T visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) { 
+    @Override 
+    public T visitChamada_atribuicao(LAParser.Chamada_atribuicaoContext ctx) { 
         String chamada_atribuicao = "";
         String parentIdent = ((LAParser.CmdContext)ctx.getParent()).IDENT().getText();
         
@@ -517,7 +536,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)chamada_atribuicao; 
     }
     
-    @Override public T visitOutros_ident(LAParser.Outros_identContext ctx) { 
+    @Override 
+    public T visitOutros_ident(LAParser.Outros_identContext ctx) { 
         if(regraVazia(ctx)){
             return (T)"";
         }
@@ -534,7 +554,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)outros_ident; 
     }
     
-    @Override public T visitIdentificador(LAParser.IdentificadorContext ctx) { 
+    @Override 
+    public T visitIdentificador(LAParser.IdentificadorContext ctx) { 
         String identificador = "";
         
         identificador += visitPonteiros_opcionais(ctx.ponteiros_opcionais()) +
@@ -546,7 +567,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)identificador; 
     }
     
-    @Override public T visitPonteiros_opcionais(LAParser.Ponteiros_opcionaisContext ctx) { 
+    @Override 
+    public T visitPonteiros_opcionais(LAParser.Ponteiros_opcionaisContext ctx) { 
         if(regraVazia(ctx)){
             return (T)"";
         }
@@ -571,7 +593,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return cmd;
     }
     
-    @Override public T visitExpressao(LAParser.ExpressaoContext ctx) { 
+    @Override 
+    public T visitExpressao(LAParser.ExpressaoContext ctx) { 
         String expressao = "";
         
         expressao += (String)visitTermo_logico(ctx.termo_logico());
@@ -582,7 +605,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T) expressao; 
     }
     
-    @Override public T visitTermo_logico(LAParser.Termo_logicoContext ctx) { 
+    @Override 
+    public T visitTermo_logico(LAParser.Termo_logicoContext ctx) { 
         String termo_logico = "";
         
         termo_logico += (String)visitFator_logico(ctx.fator_logico());
@@ -593,7 +617,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)termo_logico; 
     }
     
-    @Override public T visitFator_logico(LAParser.Fator_logicoContext ctx) { 
+    @Override 
+    public T visitFator_logico(LAParser.Fator_logicoContext ctx) { 
         String fator_logico = "";
         
         if(!regraVazia(ctx.op_nao())){
@@ -605,7 +630,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)fator_logico; 
     }
     
-    @Override public T visitParcela_logica(LAParser.Parcela_logicaContext ctx) { 
+    @Override 
+    public T visitParcela_logica(LAParser.Parcela_logicaContext ctx) { 
         String parcela_logica = "";
         
         if(ctx.getStart().getText().equals("verdadeiro")){
@@ -619,7 +645,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)parcela_logica; 
     }
     
-    @Override public T visitExp_relacional(LAParser.Exp_relacionalContext ctx) { 
+    @Override 
+    public T visitExp_relacional(LAParser.Exp_relacionalContext ctx) { 
         String exp_relacional = "";
         
         exp_relacional += (String)visitExp_aritmetica(ctx.exp_aritmetica());
@@ -628,7 +655,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)exp_relacional;
     }
     
-    @Override public T visitOp_opcional(LAParser.Op_opcionalContext ctx) { 
+    @Override 
+    public T visitOp_opcional(LAParser.Op_opcionalContext ctx) { 
         if(regraVazia(ctx)){
             return (T)"";
         }
@@ -647,7 +675,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)op_opcional; 
     }
     
-    @Override public T visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) { 
+    @Override 
+    public T visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) { 
         if(!regraVazia(ctx.outros_termos())){
             return (T) ((String) visitTermo(ctx.termo()) + (String) visitOutros_termos(ctx.outros_termos()));
         }else{
@@ -655,7 +684,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         }
     }
     
-    @Override public T visitOutros_termos(LAParser.Outros_termosContext ctx) { 
+    @Override 
+    public T visitOutros_termos(LAParser.Outros_termosContext ctx) { 
         String outros_termos = "";
         
         for(int i=0; i<ctx.op_adicao().size(); i++){
@@ -664,7 +694,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)outros_termos; 
     }
     
-    @Override public T visitTermo(LAParser.TermoContext ctx) { 
+    @Override 
+    public T visitTermo(LAParser.TermoContext ctx) { 
         if(!regraVazia(ctx.outros_fatores())){
             return (T) ((String) visitFator(ctx.fator()) + (String) visitOutros_fatores(ctx.outros_fatores()));
         }else{
@@ -672,7 +703,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         }
     }
     
-    @Override public T visitOutros_fatores(LAParser.Outros_fatoresContext ctx) { 
+    @Override 
+    public T visitOutros_fatores(LAParser.Outros_fatoresContext ctx) { 
         String outros_fatores = "";
         
         for(int i=0; i<ctx.op_multiplicacao().size(); i++){
@@ -681,7 +713,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)outros_fatores;
     }
     
-    @Override public T visitFator(LAParser.FatorContext ctx) { 
+    @Override 
+    public T visitFator(LAParser.FatorContext ctx) { 
         if(!regraVazia(ctx.outras_parcelas())){
             return (T) ((String) visitParcela(ctx.parcela()) + (String) visitOutras_parcelas(ctx.outras_parcelas()));
         }else{
@@ -689,7 +722,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         }
     }
     
-    @Override public T visitParcela(LAParser.ParcelaContext ctx) { 
+    @Override 
+    public T visitParcela(LAParser.ParcelaContext ctx) { 
         String parcela = "";
         
         if(!regraVazia(ctx.parcela_unario())){
@@ -701,9 +735,11 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T) parcela; 
     }
     
-    @Override public T visitOp_unario(LAParser.Op_unarioContext ctx) { return (T) ctx.getText(); }
+    @Override 
+    public T visitOp_unario(LAParser.Op_unarioContext ctx) { return (T) ctx.getText(); }
     
-    @Override public T visitParcela_unario(LAParser.Parcela_unarioContext ctx) { 
+    @Override 
+    public T visitParcela_unario(LAParser.Parcela_unarioContext ctx) { 
         String parcela_unario = "";
         
 //        if(!regraVazia(ctx.chamada_partes())){
@@ -729,7 +765,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T) parcela_unario; 
     }
     
-    @Override public T visitChamada_partes(LAParser.Chamada_partesContext ctx) { 
+    @Override 
+    public T visitChamada_partes(LAParser.Chamada_partesContext ctx) { 
         if(regraVazia(ctx)){
             return (T)"";
         }
@@ -748,7 +785,8 @@ public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
         return (T)chamada_partes; 
     }
     
-    @Override public T visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) { 
+    @Override 
+    public T visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) { 
         String parcela_nao_unario = "";
         
         if(!regraVazia(ctx.IDENT())){
