@@ -1,8 +1,7 @@
 package utils;
 
 /**
- *
- * @author Jp
+ * A classe é um StringBuffer usado nas diversas etapas do processo
  */
 public class SaidaParser {
     private StringBuffer buffer;
@@ -11,10 +10,6 @@ public class SaidaParser {
     public SaidaParser() {
         this.buffer = new StringBuffer();
     }
-    
-//    public void print(String texto){
-//        buffer.append(texto);
-//    }
     
     public void println(String texto) {
         for(int i=0; i<identationLevel; i++){
@@ -25,7 +20,7 @@ public class SaidaParser {
 
     @Override
     public String toString() {
-        return buffer.toString(); //To change body of generated methods, choose Tools | Templates.
+        return buffer.toString();
     }
     
     
