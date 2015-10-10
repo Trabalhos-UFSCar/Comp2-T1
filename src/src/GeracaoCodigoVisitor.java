@@ -1,4 +1,7 @@
-// Generated from .\src\LA.g4 by ANTLR 4.5.1
+package src;
+
+import antlr.*;
+import utils.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -13,7 +16,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * @param <T> The return type of the visit operation. Use {@link Void} for
  * operations with no return type.
  */
-public class Comp2Visitor<T> extends LABaseVisitor<T> {
+public class GeracaoCodigoVisitor<T> extends LABaseVisitor<T> {
     
     public SaidaParser out;
     Escopos escopos;
@@ -28,7 +31,7 @@ public class Comp2Visitor<T> extends LABaseVisitor<T> {
     //enquanto na regra mais_var. 
     String tipoAtual = "";
     
-    public Comp2Visitor(SaidaParser out){
+    public GeracaoCodigoVisitor(SaidaParser out){
         this.out = out;
         this.escopos = new Escopos();
         this.tipos = new HashMap<>();

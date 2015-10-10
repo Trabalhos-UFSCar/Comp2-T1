@@ -1,4 +1,7 @@
+package src;
 
+import antlr.*;
+import utils.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,7 +12,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-public class Comp2 {
+public class LinguagemLA {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         SaidaParser saidaSintatico = new SaidaParser(), 
@@ -30,13 +33,13 @@ public class Comp2 {
             LAParser.ProgramaContext tree = parser.programa();
             
             if(saidaSintatico.toString().isEmpty()){
-                LAListener l = new Comp2Listener(saidaSemantico);
+                LAListener l = new SemanticoListener(saidaSemantico);
                 ParseTreeWalker ptw = new ParseTreeWalker();
                 ptw.walk(l, tree);
             }
 
             if (saidaSemantico.toString().isEmpty()) {
-                LAVisitor v = new Comp2Visitor(saidaCodigoGerado);
+                LAVisitor v = new GeracaoCodigoVisitor(saidaCodigoGerado);
                 v.visitPrograma(tree);
             }
 

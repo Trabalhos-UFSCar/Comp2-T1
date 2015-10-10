@@ -1,11 +1,18 @@
+package src;
 
+/**
+ * Esta classe é responsável pela análise semântica da linguagem LA.
+ */
+
+import antlr.*;
+import utils.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class Comp2Listener extends LABaseListener {
+public class SemanticoListener extends LABaseListener {
     
     SaidaParser out;
     Escopos escopos;
@@ -20,7 +27,7 @@ public class Comp2Listener extends LABaseListener {
     List<EntradaTabelaDeSimbolos> simbolosRegistro;
     List<EntradaTabelaDeSimbolos> variaveisRegistroParaAdicionar;
     
-    public Comp2Listener(SaidaParser out) {
+    public SemanticoListener(SaidaParser out) {
         this.out = out;
         this.escopos = new Escopos();
         this.tipos = new HashMap<>();
@@ -34,9 +41,7 @@ public class Comp2Listener extends LABaseListener {
         tipos.put("literal", "char");
         tipos.put("real", "float");
         tipos.put("logico", "int");  // contorno para bool em C
-        tipos.put("nenhum", "void");
-        tipos.put("registro", "struct");
-        tipos.put("tipo_registro", "typedef struct");
+        tipos.put("registro","struct");
     }
     
     @Override
@@ -74,6 +79,10 @@ public class Comp2Listener extends LABaseListener {
         if(ctx.tipo() != null){
             String s = ctx.IDENT().getText();
             tipos.put(s, "registro");
+        } else if(ctx.valor_constante() != null){
+            String s = ctx.IDENT().getText();
+            String t = ctx.tipo_basico().getText();
+            escopos.adicionarSimbolo(s, t);
         }
     }
     
@@ -101,9 +110,7 @@ public class Comp2Listener extends LABaseListener {
     public void enterCmd(LAParser.CmdContext ctx) {
         //checagem se o retorno esta sendo usado em um escopo possivel
         if (ctx.getText().startsWith("retorne")) {
-            if (escopos.existeRegistro("procedimento")) {
-                out.println("Linha " + ctx.IDENT().getSymbol().getLine() + ": comando retorne nao permitido nesse escopo");
-            }
+            
         }
         
         if (!ctx.escopoNome.isEmpty()) {
@@ -175,17 +182,6 @@ public class Comp2Listener extends LABaseListener {
 
             }
         }
-        
-        for (EntradaTabelaDeSimbolos e : variaveisRegistroParaAdicionar) {
-            for (EntradaTabelaDeSimbolos f : simbolosRegistro) {
-                reg_var_nome = e.getNome() + "." + f.getNome();
-                reg_var_tipo = f.getTipo();
-                reg_var_dim = f.getDimensao();
-                escopos.adicionarSimbolo(reg_var_nome, reg_var_tipo, reg_var_dim);
-            }
-        }
-        
-        variaveisRegistroParaAdicionar = new ArrayList<>();
             
     }
     
@@ -212,7 +208,7 @@ public class Comp2Listener extends LABaseListener {
         }
 
         //Checagem para ter certeza de que essa variavel não foi definida anteriormente
-        if (!escopos.existeSimbolo(nome) && !tipos.containsKey(nome)) {
+        if (!escopos.existeSimbolo(nome)) {
             escopos.adicionarSimbolo(nome, tipoAtual);
             // se esta variavel for um registro, serão inseridos os seus elementos
             // em uma lista auxiliar
@@ -276,10 +272,7 @@ public class Comp2Listener extends LABaseListener {
     
     @Override
     public void enterParcela_unario(LAParser.Parcela_unarioContext ctx) {
-        //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador
-        for(int i = 0; i < ctx.getChildCount(); i++)
-            System.out.println(i + " " + ctx.getChild(i).getText());
-        
+        //checagem necessária pois nem todos os tipos de parcela unaria possuem um identificador        
         if (ctx.IDENT() != null) {
             String nome = ctx.IDENT().getText();
             if(ctx.chamada_partes() != null && ctx.chamada_partes().outros_ident() != null)
