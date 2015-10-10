@@ -5,7 +5,7 @@ import java.util.List;
 
 public class EntradaTabelaDeSimbolos {
     private String nome, tipo;
-    private Integer dimensao;//TODO: checar se´será necessário este valor 
+    private Integer dimensao;
     private List<EntradaTabelaDeSimbolos> parametrosFuncao;
     
     public EntradaTabelaDeSimbolos(String nome, String tipo) {

@@ -133,19 +133,21 @@ public class SemanticoListener extends LABaseListener {
             variaveisRegistroParaAdicionar = new ArrayList<>();
         }
     }
-    
+    /*
+        No caso de ser um comando que cria um escopo especidico, ele terá um 
+        nome de escopodefinido na gramatica diretamente, aqui é chegado se ele 
+        tem esse nome e cria um escopo com ele
+    */
     @Override
     public void enterCmd(LAParser.CmdContext ctx) {
-        //checagem se o retorno esta sendo usado em um escopo possivel
-        if (ctx.getText().startsWith("retorne")) {
-            
-        }
-        
         if (!ctx.escopoNome.isEmpty()) {
             escopos.empilhar(ctx.escopoNome);
         }
     }
     
+    /*
+        Aqui o escopo de comando é destruido 
+    */
     @Override
     public void exitCmd(LAParser.CmdContext ctx) {
         if (!ctx.escopoNome.isEmpty()) {
@@ -343,11 +345,6 @@ public class SemanticoListener extends LABaseListener {
                 
             }
         }
-    }
-    
-    @Override
-    public void enterParametro(LAParser.ParametroContext ctx) {
-        String s = ctx.getText();
     }
     
     /*
